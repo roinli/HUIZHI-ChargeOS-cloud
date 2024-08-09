@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.jingli</groupId>
+        <artifactId>jingli</artifactId>
+        <version>3.6.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>jingli-system</module>
+        <module>jingli-gen</module>
+        <module>jingli-job</module>
+        <module>jingli-file</module>
+        <module>jingli-admin</module>
+        <module>jingli-inter</module>
+    </modules>
+
+    <artifactId>jingli-modules</artifactId>
+    <packaging>pom</packaging>
+
+    <description>
+        jingli-modules业务模块
+    </description>
+
+</project>

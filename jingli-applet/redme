@@ -1,0 +1,4 @@
+充电桩unapp
+static/img 图片为备份图片，正式环境使用的是云端图片资源
+
+npm install  安装依赖

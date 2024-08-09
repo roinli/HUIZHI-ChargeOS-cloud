@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingli.inter.mapper.CodeCommonMapper">
+    <resultMap type="com.jingli.inter.entity.CodeCommon" id="CodeCommonMap">
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="codeName" column="code_name" jdbcType="VARCHAR"/>
+        <result property="parentCode" column="parent_code" jdbcType="VARCHAR"/>
+        <result property="state" column="state" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="DATE"/>
+    </resultMap>
+
+    <select id="queryCommonCode" resultType="com.jingli.inter.entity.CodeCommon">
+        SELECT
+            `code`,
+            code_name codeName
+        FROM
+            code_common
+        WHERE
+            parent_code = #{type}
+    </select>
+
+
+</mapper>

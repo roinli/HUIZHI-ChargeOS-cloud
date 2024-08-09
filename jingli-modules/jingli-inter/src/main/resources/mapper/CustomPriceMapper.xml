@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingli.inter.mapper.CustomPriceMapper">
+    <resultMap type="com.jingli.inter.entity.CustomPrice" id="CustomPriceMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="chargeType" column="charge_type" jdbcType="VARCHAR"/>
+        <result property="time" column="time" jdbcType="VARCHAR"/>
+        <result property="price" column="price" jdbcType="DECIMAL"/>
+        <result property="hours" column="hours" jdbcType="DOUBLE"/>
+        <result property="type" column="type" jdbcType="VARCHAR"/>
+        <result property="granternum" column="granternum" jdbcType="VARCHAR"/>
+        <result property="granterprice" column="granterprice" jdbcType="VARCHAR"/>
+        <result property="chargePileId" column="charge_pile_id" jdbcType="VARCHAR"/>
+        <result property="ruleId" column="rule_id" jdbcType="VARCHAR"/>
+        <result property="delFlag" column="del_flag" jdbcType="INTEGER"/>
+        <result property="servicePrice" column="service_price" jdbcType="DECIMAL"/>
+        <result property="minWatt" column="min_watt" jdbcType="INTEGER"/>
+        <result property="maxWatt" column="max_watt" jdbcType="INTEGER"/>
+        <result property="createtime" column="createtime" jdbcType="DATE"/>
+        <result property="updateTime" column="update_time" jdbcType="DATE"/>
+        <result property="priceType" column="price_type" jdbcType="INTEGER"/>
+        <result property="rangTime" column="rang_time" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="queryPriceByPlotId" resultType="com.jingli.inter.domain.PriceVO">
+        select id,
+               price,
+               service_price servicePrice,
+               hours,
+               `time`,
+               rang_time     rangeTime,
+               createtime
+        from c_custom_price ccp
+        where del_flag = 0
+          and rule_id in (select ccp2.wx_rule_id
+                          from c_charging_pile ccp2
+                                   left join c_plot cp on cp.id = ccp2.plot
+                          where cp.id = #{map.plotId}
+                            and ccp2.device_type = #{map.deviceType})
+    </select>
+    <select id="queryWxOrderPrice" resultType="com.jingli.inter.entity.CustomPrice">
+        SELECT
+            t.id,
+            charge_type chargeType,
+            time,
+            price,
+            price_type priceType,
+            service_price servicePrice,
+            hours,
+            type,
+            granternum,
+            granterprice,
+            charge_pile_id,
+            rang_time rangeTime
+        FROM
+            c_custom_price t
+        WHERE
+                rule_id = (select wx_rule_id from c_charging_pile where id = #{orderPrice.chargePileId})
+          and del_flag = 0
+        order by id desc
+        limit 1
+    </select>
+
+</mapper>

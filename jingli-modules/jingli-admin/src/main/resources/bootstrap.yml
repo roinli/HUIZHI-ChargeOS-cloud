@@ -1,0 +1,46 @@
+# Tomcat
+server:
+  port: 9210
+
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: jingli-admin
+  profiles:
+    # 环境配置
+    active: dev
+  cloud:
+    nacos:
+      username: nacos
+      password: nacosnacos
+      discovery:
+        # 服务注册地址
+        server-addr: 127.0.0.1:8848
+        namespace: 6b4d8a21-b62a-40b3-bd76-ee4c72b0a470
+        group: DEFAULT_LWH
+      config:
+        # 配置中心地址
+        server-addr: 127.0.0.1:8848
+        namespace: ${spring.cloud.nacos.discovery.namespace}
+#        group: ZFENOR_GROUP
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        shared-configs:
+          - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+      server-addr:
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    show-extensions: true
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.jingli.inter.controller
+  default-flat-param-object: false

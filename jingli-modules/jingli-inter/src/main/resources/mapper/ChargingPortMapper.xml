@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingli.inter.mapper.ChargingPortMapper">
+    <resultMap type="com.jingli.inter.entity.ChargingPort" id="ChargingPortMap">
+        <result property="id" column="ID" jdbcType="INTEGER"/>
+        <result property="userId" column="USER_ID" jdbcType="VARCHAR"/>
+        <result property="state" column="STATE" jdbcType="VARCHAR"/>
+        <result property="power" column="POWER" jdbcType="VARCHAR"/>
+        <result property="baiduX" column="BAIDU_X" jdbcType="VARCHAR"/>
+        <result property="baiduY" column="BAIDU_Y" jdbcType="VARCHAR"/>
+        <result property="address" column="ADDRESS" jdbcType="VARCHAR"/>
+        <result property="mac" column="MAC" jdbcType="VARCHAR"/>
+        <result property="name" column="NAME" jdbcType="VARCHAR"/>
+        <result property="parkid" column="parkid" jdbcType="INTEGER"/>
+        <result property="deviceid" column="deviceid" jdbcType="VARCHAR"/>
+        <result property="createtime" column="createtime" jdbcType="DATE"/>
+    </resultMap>
+    
+    <!-- 通过ID查询单条数据 -->
+    <select id="queryById" resultMap="ChargingPortMap">
+        select
+            ID,USER_ID,STATE,POWER,BAIDU_X,BAIDU_Y,ADDRESS,MAC,NAME,parkid,deviceid,createtime
+        from c_charging_port
+        where ID = #{id}
+    </select>
+    <select id="queryChargingPilePortData" resultType="com.jingli.inter.entity.ChargingPort">
+        SELECT
+            id,
+            state,
+            NAME,
+            deviceid devicePortNum,
+            parkid,
+            createtime
+        FROM
+            `c_charging_port`
+        WHERE
+            parkid =  #{key}
+    </select>
+    <select id="querySwitchPortByPortId" resultType="com.jingli.inter.entity.ChargingPort">
+        select
+            p.deviceid devicePortNum,
+            p.*,
+            p.gun_insert gunInsert
+        from c_charging_port p
+        where p.id = #{orderPortId}
+    </select>
+    <select id="queryPortInfoVo" resultType="com.jingli.inter.domain.PilePortVO">
+        select
+            ccp.ID ,
+            ccp.STATE,
+            ccp.parkid pileId,
+            ccp2.pile_type pileType,
+            ccp2.device_type deviceType,
+            (select min(price) from c_custom_price cp3 where cp3.rule_id = ccp2.wx_rule_id ) price,
+            (select min(service_price) from c_custom_price cp3 where cp3.rule_id = ccp2.wx_rule_id ) servicePrice,
+            (select min(hours) from c_custom_price cp3 where cp3.rule_id = ccp2.wx_rule_id ) hours
+        from
+            c_charging_port ccp
+                left join c_charging_pile ccp2 on ccp.parkid = ccp2.ID
+                left join c_plot cp on cp.id = ccp2.plot
+        where
+            cp.id = #{plotId}
+          and ccp2.device_type = #{deviceType}
+          and ccp2.pile_status = 1
+          and ccp2.wx_rule_id is not null
+    </select>
+</mapper>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingli.admin.mapper.PileMapper">
+
+    <resultMap id="BaseResultMap" type="com.jingli.admin.model.ChargingPile">
+        <result column="id" property="id"/>
+        <result column="pkname" property="pkname"/>
+        <result column="lat" property="lat"/>
+        <result column="lng" property="lng"/>
+        <result column="pkaddress" property="pkaddress"/>
+        <result column="pkuid" property="pkuid"/>
+        <result column="freecount" property="freecount"/>
+        <result column="imgurl" property="imgurl"/>
+        <result column="userId" property="userId"/>
+    </resultMap>
+
+    <!--分页查询充电桩列表 ，按小区顺序排序-->
+    <select id="getPilePageList" resultType="com.jingli.admin.model.SysPileResult">
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        a.id,
+        a.plot,
+        a.cp_fee_type cpFeeType,
+        plots.plot_name plotName,
+        a.PKNAME,
+        a.running_status,
+        plots.address PKADDRESS,
+        a.running_status runningStatus,
+        ( SELECT IFNULL( sum( consume_power ), 0 ) FROM c_charging_order WHERE parkid = a.id ) totalPowerConsumption,
+        a.last_use_time lastUseTime,
+        a.sim_card simCard,
+        a.sim_due_time simDueTime,
+        a.userId,
+        ( SELECT count( id ) FROM c_charging_port WHERE parkid = a.id ) portCount,
+        a.wx_rule_id wxRuleId,
+        a.card_rule_id cardRuleId,
+        us.USER_NAME userName,
+        a.device_type,
+        a.pile_type pileType,
+        a.pile_status pileStatus,
+        us.real_name realName,
+        a.electricity,
+        a.voltage,
+        a.max_power maxPower,
+        a.create_time createTime
+        FROM
+        `c_charging_pile` a
+        LEFT JOIN c_plot plots ON a.plot = plots.id
+        LEFT JOIN xt_user us ON us.id = a.userId
+        ) a
+        WHERE
+        1 =1
+        <if test="params.deviceType!=null">
+            and a.device_type = #{params.deviceType}
+        </if>
+        <if test="params.id!=null and params.id!=''">
+            and a.id like "%"#{params.id}"%"
+        </if>
+        <if test="params.plot!=null and params.plot!=''">
+            and a.plot = #{params.plot}
+        </if>
+        <if test="params.pkaddress!=null and params.pkaddress!=''">
+            and a.pkaddress like "%"#{params.pkaddress}"%"
+        </if>
+        <if test="params.keyWord!=null and params.keyWord!=''">
+            and ( a.id like "%"#{params.keyWord}"%" or a.plotName like "%"#{params.keyWord}"%"
+            or a.PKNAME like "%"#{params.keyWord}"%" or a.userName like "%"#{params.keyWord}"%" )
+        </if>
+        <choose>
+            <when test="params.userId!=null and params.userId!=''">
+                and a.userId=#{params.userId}
+            </when>
+            <otherwise>
+                <!-- 数据范围过滤 -->
+                <if test="params.dataScope != null and params.dataScope !=''">
+                    ${params.dataScope}
+                </if>
+            </otherwise>
+        </choose>
+
+    </select>
+
+    <select id="getPlotPile" resultType="com.jingli.admin.model.PlotPile">
+        SELECT a.plot_code                                               plotCode,
+               a.plot_name                                               plotName,
+               a.lat,
+               a.lng,
+               a.address,
+               (select count(id) from c_charging_pile where plot = a.id) pileCount
+        from c_plot a
+    </select>
+
+    <select id="selectPilesInfo" resultType="com.jingli.admin.model.PilesDetail">
+        SELECT
+        plie.ID id,
+        plie.PKNAME NAME,
+        CONVERT (
+        IFNULL( ord.ordergold, 0 ),
+        DECIMAL ( 12, 2 )) amount,
+        IFNULL( ord.consumePower, 0 ) power,
+        IFNULL( ord_c.count, 0 ) usedNumber,
+        ch_go.count goodPort,
+        IFNULL( ch_ba.count, 0 ) badPort,
+        running_status runningStates
+        FROM
+        c_charging_pile plie
+        LEFT JOIN ( SELECT parkid, sum( ordergold ) ordergold, sum( consume_power ) consumePower FROM c_charging_order WHERE orderstate = 3 GROUP BY parkid ) ord ON ord.parkid = plie.ID
+        LEFT JOIN ( SELECT parkid, count( 1 ) count FROM c_charging_order WHERE orderstate = 3 GROUP BY parkid ) ord_c ON ord_c.parkid = plie.ID
+        LEFT JOIN ( SELECT parkid, count( 1 ) count FROM c_charging_port WHERE STATE != 'F' GROUP BY parkid ) ch_go ON ch_go.parkid = plie.ID
+        LEFT JOIN ( SELECT parkid, count( 1 ) count FROM c_charging_port WHERE STATE = 'F' GROUP BY parkid ) ch_ba ON ch_ba.parkid = plie.ID
+        WHERE
+        plie.device_type = #{p.platForm}
+        <if test="p.userId != null and p.userId !=''">
+            and plie.userId = #{p.userId}
+        </if>
+    </select>
+
+    <select id="selectTotalByChargeNo" resultType="com.jingli.admin.model.PileIncomeVO">
+        SELECT ifnull(sum(ordergold), 0)     orderGold,
+               ifnull(sum(consume_power), 0) consumePower,
+               ifnull(sum(charge_fee), 0)    chargeFee,
+               ifnull(sum(service_fee), 0)   serviceFee,
+               count(1)                      chargeTimes,
+               ifnull(sum(real_hour), 0)     realHour
+
+        FROM c_charging_order
+        WHERE parkid = #{chargeNo}
+          and orderstate in ('3', '7')
+
+    </select>
+
+</mapper>

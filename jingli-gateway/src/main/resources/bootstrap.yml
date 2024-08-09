@@ -1,0 +1,65 @@
+# Tomcat
+server:
+  port: 10020
+
+# Spring
+spring: 
+  application:
+    # 应用名称
+    name: jingli-gateway
+  profiles:
+    # 环境配置
+    active: dev
+  cloud:
+    nacos:
+      username: nacos
+      password: nacosnacos
+      discovery:
+        # 服务注册地址
+        server-addr: 127.0.0.1:8848
+        namespace: 6b4d8a21-b62a-40b3-bd76-ee4c72b0a470
+        group: DEFAULT_LWH
+      config:
+        # 配置中心地址
+        server-addr: 127.0.0.1:8848
+        namespace: ${spring.cloud.nacos.discovery.namespace}
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        shared-configs:
+          - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+      server-addr:
+
+#    sentinel:
+#      # 取消控制台懒加载
+#      eager: true
+#      transport:
+#        # 控制台地址
+#        dashboard: 127.0.0.1:8718
+#      # nacos配置持久化
+#      datasource:
+#        ds1:
+#          nacos:
+#            server-addr: 39.98.166.234:10002
+#            dataId: sentinel-jingli-gateway
+#            groupId: DEFAULT_GROUP
+#            data-type: json
+#            rule-type: gw-flow
+
+
+knife4j:
+  gateway:
+    enabled: true
+    strategy: discover
+    discover:
+      service-config:
+        zhrj-rjjx:
+          group-name: 军休
+          order: 1
+        zhrj-system:
+          group-name: 系统
+          order: 1
+        zhrj-auth:
+          group-name: 权限
+          order: 1
+      version: openapi3

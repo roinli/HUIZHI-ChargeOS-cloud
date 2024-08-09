@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingli.inter.mapper.ChargingOrderMapper">
+    <resultMap type="com.jingli.inter.entity.ChargingOrder" id="ChargingOrderMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="weixinOpenid" column="weixin_openid" jdbcType="VARCHAR"/>
+        <result property="orderstate" column="orderstate" jdbcType="VARCHAR"/>
+        <result property="parkid" column="parkid" jdbcType="VARCHAR"/>
+        <result property="parklockid" column="parklockid" jdbcType="VARCHAR"/>
+        <result property="starttime" column="starttime" jdbcType="VARCHAR"/>
+        <result property="endtime" column="endtime" jdbcType="VARCHAR"/>
+        <result property="ordernumber" column="ordernumber" jdbcType="VARCHAR"/>
+        <result property="chargeStatus" column="charge_status" jdbcType="VARCHAR"/>
+        <result property="isFee" column="is_fee" jdbcType="VARCHAR"/>
+        <result property="consumePower" column="consume_power" jdbcType="DOUBLE"/>
+        <result property="chargingCurrent" column="charging_current" jdbcType="VARCHAR"/>
+        <result property="chargingCdgl" column="charging_cdgl" jdbcType="VARCHAR"/>
+        <result property="customPriceId" column="custom_price_id" jdbcType="VARCHAR"/>
+        <result property="hour" column="hour" jdbcType="VARCHAR"/>
+        <result property="price" column="price" jdbcType="VARCHAR"/>
+        <result property="mobile" column="mobile" jdbcType="VARCHAR"/>
+        <result property="createtime" column="createtime" jdbcType="DATE"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="cardNo" column="card_no" jdbcType="VARCHAR"/>
+        <result property="ordergold" column="ordergold" jdbcType="VARCHAR"/>
+        <result property="orderType" column="order_type" jdbcType="VARCHAR"/>
+        <result property="outTradeNo" column="out_trade_no" jdbcType="VARCHAR"/>
+        <result property="realHour" column="real_hour" jdbcType="VARCHAR"/>
+        <result property="realEndTime" column="real_end_time" jdbcType="DATE"/>
+        <result property="refundAmount" column="refund_amount" jdbcType="DOUBLE"/>
+        <result property="deviceType" column="device_type" jdbcType="INTEGER"/>
+        <result property="chargeFee" column="charge_fee" jdbcType="DECIMAL"/>
+        <result property="serviceFee" column="service_fee" jdbcType="DECIMAL"/>
+        <result property="payTime" column="pay_time" jdbcType="DATE"/>
+        <result property="orderSource" column="order_source" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <select id="queryUserOrderListPage" resultType="com.jingli.inter.domain.UserOrderVO">
+        SELECT
+        uu.*
+        FROM
+        (
+        SELECT c.* FROM
+        (SELECT
+        p.NAME,
+        p.deviceid devideId,
+        t.orderstate,
+        t.charge_status chargeStatus,
+        t.ordernumber,
+        DATE_FORMAT( t.createTime, '%Y-%m-%d %H:%i:%s' ) createTime,
+        DATE_FORMAT( t.starttime, '%Y-%m-%d %H:%i:%s' ) startTime,
+        DATE_FORMAT( t.endtime, '%Y-%m-%d %H:%i:%s' ) endTime,
+        t.hour,
+        t.card_no cardNo,
+        t.real_hour realHour,
+        t.device_type deviceType,
+        t.order_type orderType,
+        t.order_source orderSource,
+        t.parkid,
+        DATE_FORMAT( t.real_end_time, '%Y-%m-%d %H:%i:%s' ) actualendtime,
+        t.consume_power consumePower,
+        ROUND(t.ordergold,2) ordergold,
+        plot.plot_name plotName
+        FROM
+        c_charging_order t,
+        c_charging_port p,
+        c_charging_pile k,
+        c_plot plot
+        WHERE
+        t.parklockid = p.id
+        AND p.parkid = k.id
+        and k.plot = plot.id
+        <if test="searchOpenId != null and searchOpenId != ''">
+            and t.weixin_openid = #{searchOpenId}
+        </if>
+        <if test="mobile != null and mobile != ''">
+            AND t.mobile = #{mobile}
+        </if>
+
+        <if test="searchOrderStatus != null and searchOrderStatus != ''">
+            and t.orderstate = #{searchOrderStatus}
+        </if>
+        ORDER BY t.createtime DESC ) c
+        ) uu
+    </select>
+
+    <!--新增数据-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into c_charging_order(id, weixin_openid, orderstate, parkid, parklockid, starttime, endtime, ordernumber,
+                                     charge_status, is_fee, consume_power, charging_current, charging_cdgl,
+                                     custom_price_id, hour, price, mobile, createtime, code, card_no, ordergold,
+                                     order_type, out_trade_no, real_hour, real_end_time, refund_amount, device_type,
+                                     charge_fee, service_fee, pay_time, order_source)
+        values (#{id}, #{weixinOpenid}, #{orderstate}, #{parkid}, #{parklockid}, #{starttime}, #{endtime},
+                #{ordernumber}, #{chargeStatus}, #{isFee}, #{consumePower}, #{chargingCurrent}, #{chargingCdgl},
+                #{customPriceId}, #{hour}, #{price}, #{mobile}, #{createtime}, #{code}, #{cardNo}, #{ordergold},
+                #{orderType}, #{outTradeNo}, #{realHour}, #{realEndTime}, #{refundAmount}, #{deviceType}, #{chargeFee},
+                #{serviceFee}, #{payTime}, #{orderSource})
+    </insert>
+
+    <!-- 更新数据 -->
+    <update id="update">
+        update c_charging_order
+        <set>
+            <if test="id != null and id != ''">
+                id = #{id},
+            </if>
+            <if test="weixinOpenid != null and weixinOpenid != ''">
+                weixin_openid = #{weixinOpenid},
+            </if>
+            <if test="orderstate != null and orderstate != ''">
+                orderstate = #{orderstate},
+            </if>
+            <if test="parkid != null and parkid != ''">
+                parkid = #{parkid},
+            </if>
+            <if test="parklockid != null and parklockid != ''">
+                parklockid = #{parklockid},
+            </if>
+            <if test="starttime != null">
+                starttime = #{starttime},
+            </if>
+            <if test="endtime != null">
+                endtime = #{endtime},
+            </if>
+            <if test="ordernumber != null and ordernumber != ''">
+                ordernumber = #{ordernumber},
+            </if>
+            <if test="chargeStatus != null and chargeStatus != ''">
+                charge_status = #{chargeStatus},
+            </if>
+            <if test="isFee != null and isFee != ''">
+                is_fee = #{isFee},
+            </if>
+            <if test="consumePower != null and consumePower != ''">
+                consume_power = #{consumePower},
+            </if>
+            <if test="chargingCurrent != null and chargingCurrent != ''">
+                charging_current = #{chargingCurrent},
+            </if>
+            <if test="chargingCdgl != null and chargingCdgl != ''">
+                charging_cdgl = #{chargingCdgl},
+            </if>
+            <if test="customPriceId != null and customPriceId != ''">
+                custom_price_id = #{customPriceId},
+            </if>
+            <if test="hour != null and hour != ''">
+                hour = #{hour},
+            </if>
+            <if test="price != null and price != ''">
+                price = #{price},
+            </if>
+            <if test="mobile != null and mobile != ''">
+                mobile = #{mobile},
+            </if>
+            <if test="createtime != null">
+                createtime = #{createtime},
+            </if>
+            <if test="code != null and code != ''">
+                code = #{code},
+            </if>
+            <if test="cardNo != null and cardNo != ''">
+                card_no = #{cardNo},
+            </if>
+            <if test="ordergold != null and ordergold != ''">
+                ordergold = #{ordergold},
+            </if>
+            <if test="orderType != null and orderType != ''">
+                order_type = #{orderType},
+            </if>
+            <if test="outTradeNo != null and outTradeNo != ''">
+                out_trade_no = #{outTradeNo},
+            </if>
+            <if test="realHour != null and realHour != ''">
+                real_hour = #{realHour},
+            </if>
+            <if test="realEndTime != null">
+                real_end_time = #{realEndTime},
+            </if>
+            <if test="refundAmount != null and refundAmount != ''">
+                refund_amount = #{refundAmount},
+            </if>
+            <if test="deviceType != null and deviceType != ''">
+                device_type = #{deviceType},
+            </if>
+            <if test="chargeFee != null and chargeFee != ''">
+                charge_fee = #{chargeFee},
+            </if>
+            <if test="serviceFee != null and serviceFee != ''">
+                service_fee = #{serviceFee},
+            </if>
+            <if test="payTime != null and payTime != ''">
+                pay_time = #{payTime},
+            </if>
+            <if test="orderSource != null and orderSource != ''">
+                order_source = #{orderSource},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+</mapper>

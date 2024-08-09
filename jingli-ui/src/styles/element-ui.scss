@@ -1,0 +1,104 @@
+// cover some element-ui styles
+
+.el-breadcrumb__inner,
+.el-breadcrumb__inner a {
+  font-weight: 400 !important;
+}
+
+.el-upload {
+  input[type="file"] {
+    display: none !important;
+  }
+}
+
+.el-upload__input {
+  display: none;
+}
+
+// to fixed https://github.com/ElemeFE/element/issues/2461
+.el-dialog {
+  transform: none;
+  left: 0;
+  position: relative;
+  margin: 0 auto;
+}
+
+// refine element ui upload
+.upload-container {
+  .el-upload {
+    width: 100%;
+
+    .el-upload-dragger {
+      width: 100%;
+      height: 200px;
+    }
+  }
+}
+
+// dropdown
+.el-dropdown-menu {
+  a {
+    display: block;
+  }
+}
+
+// table
+.el-table__header-wrapper {
+  border-radius: 8px 8px 0 0;
+}
+
+.el-table thead {
+  font-weight: 600 !important;
+  color: #333 !important;
+}
+.el-table--enable-row-hover .el-table__body tr:hover > td.el-table__cell {
+  background-color: #f5f5f5 !important;
+}
+
+.el-tabs {
+  margin-right: 40px;
+}
+// pagination
+.el-pagination {
+  margin-top: 20px;
+}
+
+.el-pagination__editor.el-input {
+  margin: 0 20px;
+}
+
+.el-button--success:focus,
+.el-button--success:hover,
+.el-button--success {
+  background: #45bf73 !important;
+  border-color: #45bf73 !important;
+}
+
+.el-button--danger,
+.el-button--danger:focus,
+.el-button--danger:hover {
+  background: #f06a6a !important;
+  border-color: #f06a6a !important;
+}
+
+.el-button{
+  height: 40px;
+}
+.el-button--small{
+  height: 32px;
+}
+.el-button--medium{
+  height: 36px;
+}
+.el-button--mini{
+  height: 28px;
+}
+
+.editCell{
+  button{
+    margin: 4px 0;
+  }
+}
+.el-dialog__body {
+  padding: 10px 20px;
+}

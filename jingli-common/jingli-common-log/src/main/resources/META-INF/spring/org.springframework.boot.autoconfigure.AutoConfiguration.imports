@@ -1,0 +1,2 @@
+com.jingli.common.log.service.AsyncLogService
+com.jingli.common.log.aspect.LogAspect

@@ -1,0 +1,140 @@
+version : '3.8'
+services:
+  jingli-nacos:
+    container_name: jingli-nacos
+    image: nacos/nacos-server
+    build:
+      context: ./nacos
+    environment:
+      - MODE=standalone
+    volumes:
+      - ./nacos/logs/:/home/nacos/logs
+      - ./nacos/conf/application.properties:/home/nacos/conf/application.properties
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    depends_on:
+      - jingli-mysql
+  jingli-mysql:
+    container_name: jingli-mysql
+    image: mysql:5.7
+    build:
+      context: ./mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql/conf:/etc/mysql/conf.d
+      - ./mysql/logs:/logs
+      - ./mysql/data:/var/lib/mysql
+    command: [
+          'mysqld',
+          '--innodb-buffer-pool-size=80M',
+          '--character-set-server=utf8mb4',
+          '--collation-server=utf8mb4_unicode_ci',
+          '--default-time-zone=+8:00',
+          '--lower-case-table-names=1'
+        ]
+    environment:
+      MYSQL_DATABASE: 'ry-cloud'
+      MYSQL_ROOT_PASSWORD: password
+  jingli-redis:
+    container_name: jingli-redis
+    image: redis
+    build:
+      context: ./redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/conf/redis.conf:/home/jingli/redis/redis.conf
+      - ./redis/data:/data
+    command: redis-server /home/jingli/redis/redis.conf
+  jingli-nginx:
+    container_name: jingli-nginx
+    image: nginx
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/html/dist:/home/jingli/projects/jingli-ui
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - jingli-gateway
+    links:
+      - jingli-gateway
+  jingli-gateway:
+    container_name: jingli-gateway
+    build:
+      context: ./jingli/gateway
+      dockerfile: dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - jingli-redis
+    links:
+      - jingli-redis
+  jingli-auth:
+    container_name: jingli-auth
+    build:
+      context: ./jingli/auth
+      dockerfile: dockerfile
+    ports:
+      - "9200:9200"
+    depends_on:
+      - jingli-redis
+    links:
+      - jingli-redis
+  jingli-modules-system:
+    container_name: jingli-modules-system
+    build:
+      context: ./jingli/modules/system
+      dockerfile: dockerfile
+    ports:
+      - "9201:9201"
+    depends_on:
+      - jingli-redis
+      - jingli-mysql
+    links:
+      - jingli-redis
+      - jingli-mysql
+  jingli-modules-gen:
+    container_name: jingli-modules-gen
+    build:
+      context: ./jingli/modules/gen
+      dockerfile: dockerfile
+    ports:
+      - "9202:9202"
+    depends_on:
+      - jingli-mysql
+    links:
+      - jingli-mysql
+  jingli-modules-job:
+    container_name: jingli-modules-job
+    build:
+      context: ./jingli/modules/job
+      dockerfile: dockerfile
+    ports:
+      - "9203:9203"
+    depends_on:
+      - jingli-mysql
+    links:
+      - jingli-mysql
+  jingli-modules-file:
+    container_name: jingli-modules-file
+    build:
+      context: ./jingli/modules/file
+      dockerfile: dockerfile
+    ports:
+      - "9300:9300"
+    volumes:
+    - ./jingli/uploadPath:/home/jingli/uploadPath
+  jingli-visual-monitor:
+    container_name: jingli-visual-monitor
+    build:
+      context: ./jingli/visual/monitor
+      dockerfile: dockerfile
+    ports:
+      - "9100:9100"

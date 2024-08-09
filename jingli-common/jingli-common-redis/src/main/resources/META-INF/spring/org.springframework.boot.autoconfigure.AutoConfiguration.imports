@@ -1,0 +1,2 @@
+com.jingli.common.redis.configure.RedisConfig
+com.jingli.common.redis.service.RedisService

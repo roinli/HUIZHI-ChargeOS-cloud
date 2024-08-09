@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingli.inter.mapper.ChargingPileMapper">
+    <resultMap type="com.jingli.inter.entity.ChargingPile" id="ChargingPileMap">
+        <result property="id" column="ID" jdbcType="INTEGER"/>
+        <result property="pkname" column="PKNAME" jdbcType="VARCHAR"/>
+        <result property="cpFeeType" column="cp_fee_type" jdbcType="VARCHAR"/>
+        <result property="simCard" column="sim_card" jdbcType="VARCHAR"/>
+        <result property="simDueTime" column="sim_due_time" jdbcType="VARCHAR"/>
+        <result property="equipTemperature" column="equip_temperature" jdbcType="DOUBLE"/>
+        <result property="equipCpuTemperature" column="equip_cpu_temperature" jdbcType="DOUBLE"/>
+        <result property="lat" column="LAT" jdbcType="VARCHAR"/>
+        <result property="lng" column="LNG" jdbcType="VARCHAR"/>
+        <result property="pkaddress" column="PKADDRESS" jdbcType="VARCHAR"/>
+        <result property="imgUrl" column="img_url" jdbcType="VARCHAR"/>
+        <result property="runningStatus" column="running_status" jdbcType="INTEGER"/>
+        <result property="userid" column="userId" jdbcType="VARCHAR"/>
+        <result property="lastUseTime" column="last_use_time" jdbcType="DATE"/>
+        <result property="plot" column="plot" jdbcType="VARCHAR"/>
+        <result property="wxRuleId" column="wx_rule_id" jdbcType="INTEGER"/>
+        <result property="cardRuleId" column="card_rule_id" jdbcType="INTEGER"/>
+        <result property="createTime" column="create_time" jdbcType="DATE"/>
+        <result property="deviceType" column="device_type" jdbcType="INTEGER"/>
+        <result property="pileType" column="pile_type" jdbcType="INTEGER"/>
+        <result property="pileStatus" column="pile_status" jdbcType="INTEGER"/>
+        <result property="electricity" column="electricity" jdbcType="VARCHAR"/>
+        <result property="voltage" column="voltage" jdbcType="VARCHAR"/>
+        <result property="maxPower" column="max_power" jdbcType="INTEGER"/>
+        <result property="feeNeedUpdate" column="fee_need_update" jdbcType="INTEGER"/>
+    </resultMap>
+    
+    <select id="queryChargingPileData" resultType="com.jingli.inter.domain.ChargingPileVO">
+        SELECT
+            a.id,
+            a.PKNAME,
+            c1.`Name` province,
+            c2.`Name` city,
+            c3.`Name` regionName,
+            c3.Id regionCode,
+            a.device_type deviceType,
+            b.address PKADDRESS,
+            b.plot_name plotName,
+            a.pile_type pileType
+        FROM
+            `c_charging_pile` a
+                left JOIN c_plot b on a.plot=b.id
+                left join c_city c3 on b.region_code=c3.Id
+                left join c_city c2 on c3.Pid=c2.Id
+                left join c_city c1 on c2.Pid=c1.Id
+        WHERE
+            a.id = #{key}
+    </select>
+    <select id="queryChargingPile" resultType="com.jingli.inter.entity.ChargingPile">
+        SELECT
+            id,
+            PKNAME,
+            device_type deviceType,
+            cp_fee_type cpFeeType,
+            running_status runningStatus
+        FROM
+            c_charging_pile
+        WHERE
+            id = #{chargingPileNo}
+    </select>
+    <select id="queryConfigByKey" resultType="java.lang.String">
+        select config_value  configValue from sys_config where config_key = #{configKey}
+
+    </select>
+    <select id="queryNewsByNewsConfigKey" resultType="com.jingli.inter.domain.NewsDto">
+        select *  from sys_news where status = '1' and  config_key = #{newsConfigKey} and type = #{type}
+    </select>
+    <select id="queryNewsNameList" resultType="com.jingli.inter.domain.NewsDto">
+        select id, type,title as name ,title, config_key as configKey,sort,remark  from sys_news where  status = 1 and type = #{type}   order by sort ;
+    </select>
+    <select id="queryPlotInfoByVo" resultType="com.jingli.inter.domain.PlotVO">
+        select * from (
+            select
+                cp.id,
+                cp.plot_name plotName,
+                c1.`Name` province,
+                c2.`Name` city,
+                c3.`Name` regionName,
+                cp.lat ,
+                cp.lng ,
+                cp.address ,
+                cp.park_car_info parkCarInfo,
+                cp.receipt_status receiptStatus,
+                cp.supporting_facilities supportingFacilities,
+                cp.park_car_status parkCarStatus,
+                cp.device_type deviceType
+
+            from
+                c_plot cp
+                    left join c_city c3 on cp.region_code=c3.Id
+                    left join c_city c2 on c3.Pid=c2.Id
+                    left join c_city c1 on c2.Pid=c1.Id
+            where 1=1
+
+        <if test="deviceType != null and deviceType != ''">
+            and cp.device_type = #{deviceType}
+        </if>
+
+            and        (acos(sin((#{lat} * 3.1415)/180)*sin((lat * 3.1415)/ 180)
+                        + cos((#{lat} * 3.1415)/180)*cos((lat * 3.1415)/ 180)*cos((#{lng} * 3.1415)/180
+                            - (lng * 3.1415)/ 180))* 6371393) <![CDATA[<]]> #{distance} ) t
+        where 1=1
+        <if test="city != null and city != ''">
+            and t.city   like concat('%',#{city},'%')
+        </if>
+
+        <if test="plotName != null and plotName != ''">
+            and t.plotName   like concat('%',#{plotName},'%')
+        </if>
+        <if test="address != null and address != ''">
+            and t.address   like concat('%',#{address},'%')
+        </if>
+
+
+
+    </select>
+</mapper>

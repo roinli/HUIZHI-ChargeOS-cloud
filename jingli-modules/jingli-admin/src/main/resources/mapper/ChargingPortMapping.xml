@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingli.admin.mapper.ChargingPortMapper">
+
+    <resultMap id="BaseResultMap" type="com.jingli.admin.model.ChargingPort">
+        <result column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="state" property="state"/>
+        <result column="power" property="power"/>
+        <result column="baidu_x" property="baiduX"/>
+        <result column="baidu_y" property="baiduY"/>
+        <result column="address" property="address"/>
+        <result column="mac" property="mac"/>
+        <result column="name" property="name"/>
+        <result column="parkid" property="parkid"/>
+        <result column="deviceid" property="deviceid"/>
+        <result column="switch" property="switch"/>
+        <result column="totalPowerConsumption" property="totalPowerConsumption"/>
+        <result column="createtime" property="createtime"/>
+    </resultMap>
+
+
+</mapper>

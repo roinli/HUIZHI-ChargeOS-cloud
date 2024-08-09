@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.jingli</groupId>
+        <artifactId>jingli-common</artifactId>
+        <version>3.6.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    
+    <artifactId>jingli-common-log</artifactId>
+	
+    <description>
+        jingli-common-log日志记录
+    </description>
+
+    <dependencies>
+		
+        <!-- jingli Common Security -->
+        <dependency>
+            <groupId>com.jingli</groupId>
+            <artifactId>jingli-common-security</artifactId>
+        </dependency>
+        
+    </dependencies>
+</project>

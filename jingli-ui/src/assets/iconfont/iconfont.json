@@ -1,0 +1,16 @@
+{
+  "id": "1521149",
+  "name": "运营端后端图标",
+  "font_family": "iconfontali",
+  "css_prefix_text": "iconali",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "11888440",
+      "name": "password",
+      "font_class": "password",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    }
+  ]
+}

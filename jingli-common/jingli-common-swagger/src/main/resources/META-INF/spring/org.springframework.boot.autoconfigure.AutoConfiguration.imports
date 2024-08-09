@@ -1,0 +1,3 @@
+# com.jingli.common.swagger.config.SwaggerAutoConfiguration
+# com.jingli.common.swagger.config.SwaggerWebConfiguration
+# com.jingli.common.swagger.config.SwaggerBeanPostProcessor

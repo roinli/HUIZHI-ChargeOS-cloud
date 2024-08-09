@@ -1,0 +1,15 @@
+# 基础镜像
+FROM  openjdk:8-jre
+# author
+MAINTAINER jingli
+
+# 挂载目录
+VOLUME /home/jingli
+# 创建目录
+RUN mkdir -p /home/jingli
+# 指定路径
+WORKDIR /home/jingli
+# 复制jar文件到路径
+COPY ./jar/jingli-modules-file.jar /home/jingli/jingli-modules-file.jar
+# 启动文件服务
+ENTRYPOINT ["java","-jar","jingli-modules-file.jar"]

@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingli.admin.mapper.OrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.jingli.admin.model.ChargingOrder">
+        <result column="id" property="id"/>
+        <result column="order_type" property="orderType"/>
+        <result column="consume_power" property="consumePower"/>
+        <result column="custom_price_id" property="customPriceId"/>
+        <result column="parklockid" property="parklockid"/>
+        <result column="hour" property="hour"/>
+        <result column="price" property="price"/>
+        <result column="mobile" property="mobile"/>
+        <result column="createtime" property="createtime"/>
+        <result column="parkid" property="parkid"/>
+        <result column="code" property="code"/>
+        <result column="ordernumber" property="ordernumber"/>
+        <result column="orderstate" property="orderstate"/>
+        <result column="weixin_openid" property="weixinOpenid"/>
+        <result column="ordergold" property="ordergold"/>
+        <result column="out_trade_no" property="outTradeNo"/>
+        <result column="starttime" property="starttime"/>
+        <result column="endtime" property="endtime"/>
+    </resultMap>
+
+    <!--获取订单列表-->
+    <select id="getOrderList" parameterType="map" resultType="com.jingli.admin.model.OrderResult">
+        select
+        *
+        from (
+        SELECT
+        a.id,
+        b.user_name userName,
+        IF( c.id IS NULL, '平台', c.real_name ) agentName,
+        a.price*a.hour estimateAmount,
+        convert(IFNULL(a.ordergold, 0 ), decimal(12,2)) orderGold,
+        convert(IFNULL(a.ordergold, 0 ), decimal(12,2)) price,
+        convert(IFNULL(a.refund_amount, 0 ), decimal(12,2)) refundAmount,
+        ifnull( a.HOUR, 0 ) AS HOUR,
+        ( CASE orderstate
+        WHEN '1' THEN '下单'
+        WHEN '2' THEN '取消'
+        WHEN '3' THEN '支付成功'
+        WHEN '4' THEN '退款'
+        WHEN '5' THEN '完成'
+        WHEN '6' THEN '结算中'
+        WHEN '7' THEN '手动结算' END ) orderstate,
+        a.starttime,
+        a.endtime,
+        a.pay_time payTime,
+        a.real_end_time realEndTime,
+        a.createtime,
+        a.ordernumber,
+        a.parkid,
+        d.pkname pileName,
+        (SELECT code_name FROM code_common WHERE CODE = a.order_type and parent_code = '8') AS orderType,
+        p.NAME portName,
+        convert(IFNULL(a.real_hour,0),
+        decimal(12,2)) AS realHour,
+        IFNULL(a.card_no,'公众号') cardName,
+        a.card_no cardNo,
+        convert(IFNULL(a.consume_power, 0 ),
+        decimal(12,3)) consumePower,
+        a.charging_current chargingCurrent,
+        a.charging_cdgl chargingCdgl,
+        b.mobile,
+        d.pkaddress parkAddress,
+        ( CASE charge_status WHEN '9001' THEN '未开始'
+        WHEN '9002' THEN '充电中'
+        WHEN '9003' THEN '充电完成'
+        WHEN '9004' THEN '已定时扣款' END )
+        chargeStatus
+        FROM
+        c_charging_order a
+        LEFT JOIN t_user b ON a.weixin_openid = b.weixin_openid
+        LEFT JOIN c_charging_port p ON a.parklockid = p.id
+        LEFT JOIN c_charging_pile d ON d.id = a.parkid
+        LEFT JOIN xt_user c ON c.id = d.userid
+        WHERE 1=1
+        and a.device_type = #{params.platForm}
+        <if test="params.userOrNum!=null and params.userOrNum!=''">
+            and (b.user_name like "%"#{params.userOrNum}"%"
+            or a.ordernumber like "%"#{params.userOrNum}"%"
+            or b.mobile like "%"#{params.userOrNum}"%"
+            or a.card_no like "%"#{params.userOrNum}"%")
+        </if>
+        <if test="params.order.state!=null and params.order.state!=''">
+            and a.orderstate = #{params.order.state}
+        </if>
+        <if test="params.order.cardNo!=null and params.order.cardNo!=''">
+            and a.card_no like "%"#{params.order.cardNo}"%"
+        </if>
+        <if test="params.order.ordernumber!=null and params.order.ordernumber!=''">
+            and (a.ordernumber like "%"#{params.order.ordernumber}"%" or b.mobile like "%"#{params.order.ordernumber}"%"
+            or a.mobile like "%"#{params.order.ordernumber}"%")
+        </if>
+        <if test="params.order.startTime!=null and params.order.startTime!=''">
+            and date_format(a.createtime,'%Y-%m-%d') BETWEEN #{params.order.startTime} AND #{params.order.endTime}
+        </if>
+        <if test="params.startTime1!=null">
+            and date_format(a.createtime, '%Y-%m-%d' ) BETWEEN #{params.startTime1} AND #{params.endTime}
+        </if>
+        <if test="params.order.plot!=null and params.order.plot!=''">
+            and a.parkid in(select id from c_charging_pile where plot =#{params.order.plot})
+        </if>
+        <if test="params.order.parkid!=null and params.order.parkid!=''">
+            and a.parkid =#{params.order.parkid}
+        </if>
+        <if test="params.orderState!=null and params.orderState!=''">
+            and a.orderstate =#{params.orderState}
+        </if>
+        <choose>
+            <when test="params.order.userId!=null and params.order.userId!=''">
+                and a.parkid in(select id from c_charging_pile where userId =#{params.order.userId})
+            </when>
+            <when test="params.userId!=null and params.userId!=''">
+                and a.parkid in(select id from c_charging_pile where userId =#{params.userId})
+            </when>
+            <otherwise>
+                <!-- 数据范围过滤 -->
+                ${params.dataScope}
+            </otherwise>
+        </choose>
+        order by a.createtime desc
+        ) a
+    </select>
+
+    <!--获取统计新增用户 、 销售总额-->
+    <select id="getUsersAndSales" resultType="map">
+        select
+        IFNULL((SELECT
+        count(*)
+        from
+        t_user
+        where 1=1
+        <if test="userId!=null and userId!=''">
+            and weixin_openid in (select
+            weixin_openid
+            from
+            c_charging_order
+            where
+            parkid in (select
+            id
+            from
+            c_charging_pile
+            where
+            userId=#{userId}))
+        </if>),0) userCount,
+        IFNULL((select
+        convert(sum(ordergold), decimal(12,2))
+        from
+        c_charging_order
+        where
+        orderstate=3
+        and device_type = #{platForm}
+        <if test="userId!=null and userId!=''">
+            and parkid in (select
+            id
+            from
+            c_charging_pile
+            where
+            userId=#{userId})
+        </if>
+        ),0) sumSales
+        from
+        DUAL
+    </select>
+    <!--获取销售统计数据-->
+    <select id="getSalesData" resultType="com.jingli.admin.model.SalesData">
+        select
+        IFNULL((SELECT count(*) from c_charging_order
+        where orderstate != '2'
+        and device_type = #{p.platForm}
+        <if test="p.userId!=null and p.userId!=''">
+            and parkid in (select
+            id
+            from
+            c_charging_pile
+            where
+            userId=#{p.userId})
+        </if>),0) sumCount,
+        IFNULL((SELECT sum(ordergold) from c_charging_order
+        where orderstate in ('3','7')
+        and device_type = #{p.platForm}
+        <if test="p.userId!=null and p.userId!=''">
+            and parkid in (select
+            id
+            from
+            c_charging_pile
+            where
+            userId=#{p.userId})
+        </if>),0) sumSales,
+        IFNULL((SELECT count(*) from c_charging_order
+        where orderstate=4
+        and device_type = #{p.platForm}
+        <if test="p.userId!=null and p.userId!=''">
+            and parkid in (select
+            id
+            from
+            c_charging_pile
+            where
+            userId=#{p.userId})
+        </if>),0) reCount,
+        IFNULL((SELECT sum(refund_amount) from c_charging_order
+        where orderstate=4
+        and device_type = #{p.platForm}
+        <if test="p.userId!=null and p.userId!=''">
+            and parkid in (select
+            id
+            from
+            c_charging_pile
+            where
+            userId=#{p.userId})
+        </if>),0)reSales,
+        IFNULL(
+        (SELECT
+        sum( a.consume_power)
+        FROM c_charging_order a
+        left join c_charging_pile b on a.parkid = b.id
+        where
+        b.device_type = #{p.platForm}
+        <if test="p.userId!=null and p.userId!=''">
+            and a.parkid in (select
+            id
+            from
+            c_charging_pile
+            where
+            userId=#{p.userId})
+        </if>
+        ),0) totalPowerConsumption,
+        IFNULL(0,0) rechargeAmount
+        ,
+
+        (SELECT
+        count(1)
+        FROM
+        c_charging_pile a
+        where
+        running_status = 1
+        and a.device_type = #{p.platForm}
+        <if test="p.userId!=null and p.userId!=''">
+            and a.userId = #{p.userId}
+        </if>
+        ) offLine,
+
+        (SELECT
+        count(1)
+        FROM
+        c_charging_pile a
+        where
+        running_status = 0
+        and a.device_type = #{p.platForm}
+        <if test="p.userId!=null and p.userId!=''">
+            and a.userId = #{p.userId}
+        </if>
+        ) onLine
+
+        from
+        dual
+
+    </select>
+    <!--获取销售统计详情-->
+    <select id="getSalesDetail" resultType="com.jingli.admin.model.SalesDetail">
+        select
+        a.createTime,
+        (select
+        IFNULL(sum(co.ordergold),0)
+        from
+        c_charging_order co
+        left join c_charging_pile ccp on co.parkid = ccp.ID
+        where co.orderstate=3
+        and co.device_type = #{p.platForm}
+        and DATE_FORMAT(co.createtime,'%Y-%m-%d') = a.createTime
+        <if test="p.userId!=null and p.userId!=''">
+            and ccp.userId = #{p.userId}
+        </if>
+        ) sumSales,
+        (select
+        IFNULL(sum(co.refund_amount),0)
+        from
+        c_charging_order co
+        left join c_charging_pile ccp on co.parkid = ccp.ID
+        where co.orderstate=4
+        and co.device_type = #{p.platForm}
+        and DATE_FORMAT(co.createtime,'%Y-%m-%d') = a.createTime
+        <if test="p.userId!=null and p.userId!=''">
+            and ccp.userId = #{p.userId}
+        </if>
+        ) reSales,
+        (select
+        IFNULL(count(*),0)
+        from
+        c_charging_order co
+        left join c_charging_pile ccp on co.parkid = ccp.ID
+        where
+        DATE_FORMAT(co.createtime,'%Y-%m-%d') = a.createTime
+        and co.device_type = #{p.platForm}
+        <if test="p.userId!=null and p.userId!=''">
+            and ccp.userId = #{p.userId}
+        </if>
+        ) sumCount,
+        (select
+        IFNULL(count(*),0)
+        from
+        c_charging_order co
+        left join c_charging_pile ccp on co.parkid = ccp.ID
+        where
+        co.orderstate=3
+        and co.device_type = #{p.platForm}
+        and DATE_FORMAT(co.createtime,'%Y-%m-%d') = a.createTime
+        <if test="p.userId!=null and p.userId!=''">
+            and ccp.userId = #{p.userId}
+        </if>
+        )validCount,
+        (select
+        IFNULL(count(*),0)
+        from
+        c_charging_order co
+        left join c_charging_pile ccp on co.parkid = ccp.ID
+        where
+        co.orderstate=4
+        and co.device_type = #{p.platForm}
+        and DATE_FORMAT(co.createtime,'%Y-%m-%d') = a.createTime
+        <if test="p.userId!=null and p.userId!=''">
+            and ccp.userId = #{p.userId}
+        </if>
+        ) reCount
+        from ( select
+        DATE_FORMAT(co.createtime,'%Y-%m-%d') createTime
+        from
+        c_charging_order co
+        left join c_charging_pile ccp on co.parkid = ccp.ID
+        where
+        co.device_type = #{p.platForm}
+        <if test="p.userId!=null and p.userId!=''">
+            and ccp.userId = #{p.userId}
+        </if>
+        GROUP BY
+        DATE_FORMAT(co.createtime,'%Y-%m-%d')
+        ) a
+        order by
+        a.createTime desc
+    </select>
+
+
+</mapper>

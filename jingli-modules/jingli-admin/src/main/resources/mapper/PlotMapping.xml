@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingli.admin.mapper.PlotMapper">
+
+    <select id="getPlotList" parameterType="map" resultType="com.jingli.admin.model.PlotResult">
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        a.id,
+        a.plot_code plotCode,
+        a.plot_name plotName,
+        a.address,
+        a.region_code regionCode,
+        a.create_time createTime,
+        a.lng,
+        a.lat,
+        a.park_car_info,
+        a.park_car_status,
+        a.receipt_status,
+        a.supporting_facilities,
+        (select count(*) from c_charging_pile where plot = a.id) pileNum
+        FROM
+        c_plot a
+        where
+        a.device_type = #{p.platForm}
+        <if test="p.userId != null and p.userId !=''">
+            and a.user_id = #{p.userId}
+        </if>
+        ORDER BY a.create_time desc
+        ) b
+        where 1=1
+        <if test="p.keyWord!=null and p.keyWord!=''">
+            and b.plotName like "%"#{p.keyWord}"%" or b.plotName like "%"#{p.keyWord}"%"
+            or b.regionName like "%"#{p.keyWord}"%"
+        </if>
+
+    </select>
+</mapper>

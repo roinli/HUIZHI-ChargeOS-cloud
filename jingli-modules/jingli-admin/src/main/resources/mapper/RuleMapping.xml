@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jingli.admin.mapper.RuleMapper">
+
+    <resultMap id="BaseResultMap" type="com.jingli.admin.model.Rule">
+        <result column="id" property="id"/>
+        <result column="change_name" property="changeName"/>
+        <result column="charge_type" property="chargeType"/>
+        <result column="rule_type" property="ruleType"/>
+        <result column="device_type" property="deviceType"/>
+        <result column="user_id" property="userId"/>
+        <result column="createtime" property="createtime"/>
+    </resultMap>
+
+    <!--获取规则列表-->
+    <select id="getRuleListByUserNm" parameterType="map" resultType="com.jingli.admin.model.Rule">
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        a.user_id userId,
+        a.id,
+        a.change_name changeName,
+        a.rule_type ruleType,
+        a.device_type deviceType,
+        codes.code_name ruleTypeName,
+        a.charge_type chargeType,
+        ( SELECT count( id ) FROM c_charging_pile WHERE wx_rule_id = a.id and device_type = a.device_type ) pileCount,
+        a.is_give AS isGive,
+        a.is_sys_give AS isSysGive,
+        a.createtime createTime,
+        us.USER_NAME userNm,
+        us.real_name realName,
+        us.useraccount
+        FROM
+        c_rule a
+        LEFT JOIN code_common codes ON a.rule_type = codes.CODE
+        left join xt_user us ON us.id = a.user_id and us.is_operator = 1
+        ) a
+        where 1=1
+        <if test="p.ruleType!=null and p.ruleType!=''">
+            and a.ruleType=#{p.ruleType}
+        </if>
+        <if test="p.deviceType!=null and p.deviceType!=''">
+            and a.deviceType=#{p.deviceType}
+        </if>
+        <if test="p.ruleNm!=null and p.ruleNm!=''">
+            and a.changeName like "%"#{p.ruleNm}"%"
+        </if>
+        <choose>
+            <when test="p.userId!=null and p.userId!=''">
+                and a.userId = #{p.userId}
+            </when>
+            <otherwise>
+                <if test="p.dataScope != null and p.dataScope != ''">
+                    ${p.dataScope}
+                </if>
+            </otherwise>
+        </choose>
+
+    </select>
+
+</mapper>
