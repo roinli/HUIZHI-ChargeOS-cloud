@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.OrderLogMapper">
+
+    <resultMap type="com.hcp.system.api.domain.OrderLog" id="OrderLogResult">
+        <result property="id"    column="id"    />
+        <result property="mainProcess"    column="main_process"    />
+        <result property="briefInfo"    column="brief_info"    />
+        <result property="logContent"    column="log_content"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="orderNumber"    column="order_number"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectOrderLogVo">
+        select id, main_process, brief_info, log_content, create_time, order_number, update_time from c_order_log
+    </sql>
+
+    <select id="selectOrderLogList"   resultMap="OrderLogResult">
+        <include refid="selectOrderLogVo"/>
+        <where>
+            <if test="query.mainProcess != null "> and main_process = #{query.mainProcess}</if>
+            <if test="query.logContent != null  and query.logContent != ''"> and log_content = #{query.logContent}</if>
+            <if test="query.orderNumber != null  and query.orderNumber != ''"> and order_number = #{query.orderNumber}</if>
+        </where>
+    </select>
+
+    <delete id="deleteOrderLogByIds" parameterType="String">
+        delete from c_order_log where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+    <select id="selectOrderLogListByOrderNumber"   resultMap="OrderLogResult">
+        <include refid="selectOrderLogVo"/>
+        where order_number = #{orderNumber}
+    </select>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="OrderLogResult">
+        <include refid="selectOrderLogVo" />
+        where  id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from c_order_log
+        where  id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insertOrderLog" keyColumn="id" keyProperty="id" parameterType="com.hcp.system.api.domain.OrderLog" useGeneratedKeys="true">
+        insert into c_order_log
+        ( id,main_process,brief_info
+        ,log_content,create_time,order_number
+        ,update_time,tenant_id)
+        values (#{id,jdbcType=INTEGER},#{mainProcess,jdbcType=INTEGER},#{briefInfo,jdbcType=VARCHAR}
+               ,#{logContent,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP},#{orderNumber,jdbcType=VARCHAR}
+               ,#{updateTime,jdbcType=TIMESTAMP},#{tenantId,jdbcType=BIGINT})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.hcp.system.api.domain.OrderLog" useGeneratedKeys="true">
+        insert into c_order_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="mainProcess != null">main_process,</if>
+            <if test="briefInfo != null">brief_info,</if>
+            <if test="logContent != null">log_content,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="orderNumber != null">order_number,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="tenantId != null">tenant_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id,jdbcType=INTEGER},</if>
+            <if test="mainProcess != null">#{mainProcess,jdbcType=INTEGER},</if>
+            <if test="briefInfo != null">#{briefInfo,jdbcType=VARCHAR},</if>
+            <if test="logContent != null">#{logContent,jdbcType=VARCHAR},</if>
+            <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="orderNumber != null">#{orderNumber,jdbcType=VARCHAR},</if>
+            <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
+            <if test="tenantId != null">#{tenantId,jdbcType=BIGINT},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hcp.system.api.domain.OrderLog">
+        update c_order_log
+        <set>
+            <if test="mainProcess != null">
+                main_process = #{mainProcess,jdbcType=INTEGER},
+            </if>
+            <if test="briefInfo != null">
+                brief_info = #{briefInfo,jdbcType=VARCHAR},
+            </if>
+            <if test="logContent != null">
+                log_content = #{logContent,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="orderNumber != null">
+                order_number = #{orderNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+        </set>
+        where   id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hcp.system.api.domain.OrderLog">
+        update c_order_log
+        set
+            main_process =  #{mainProcess,jdbcType=INTEGER},
+            brief_info =  #{briefInfo,jdbcType=VARCHAR},
+            log_content =  #{logContent,jdbcType=VARCHAR},
+            create_time =  #{createTime,jdbcType=TIMESTAMP},
+            order_number =  #{orderNumber,jdbcType=VARCHAR},
+            update_time =  #{updateTime,jdbcType=TIMESTAMP},
+            tenant_id =  #{tenantId,jdbcType=BIGINT}
+        where   id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

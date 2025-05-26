@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.HlhtStationInfoMapper">
+
+    <resultMap type="com.hcp.operator.domain.HlhtStationInfo" id="HlhtStationInfoResult">
+        <result property="stationId"    column="station_id"    />
+        <result property="stationName"    column="station_name"    />
+        <result property="stationUniqueNumber"    column="station_unique_number"    />
+        <result property="equipmentOwnerId"    column="equipment_owner_id"    />
+        <result property="operatorId"    column="operator_id"    />
+        <result property="countryCode"    column="country_code"    />
+        <result property="areaCode"    column="area_code"    />
+        <result property="areaCodeCountryside"    column="area_code_countryside"    />
+        <result property="address"    column="address"    />
+        <result property="stationType"    column="station_type"    />
+        <result property="stationStatus"    column="station_status"    />
+        <result property="stationLng"    column="station_lng"    />
+        <result property="stationLat"    column="station_lat"    />
+        <result property="stationTel"    column="station_tel"    />
+        <result property="parkNum"    column="park_num"    />
+        <result property="serviceTel"    column="service_tel"    />
+        <result property="siteGuide"    column="site_guide"    />
+        <result property="stationClassification"    column="station_classification"    />
+        <result property="generalApplicationType"    column="general_application_type"    />
+        <result property="matchCars"    column="match_cars"    />
+        <result property="parkType"    column="park_type"    />
+        <result property="pictures"    column="pictures"    />
+        <result property="parkInfo"    column="park_info"    />
+        <result property="busineHours"    column="busine_hours"    />
+        <result property="electricityFee"    column="electricity_fee"    />
+        <result property="swapFee"    column="swap_fee"    />
+        <result property="serviceFee"    column="service_fee"    />
+        <result property="parkFee"    column="park_fee"    />
+        <result property="roundTheClock"    column="round_the_clock"    />
+        <result property="payment"    column="payment"    />
+        <result property="supportOrder"    column="support_order"    />
+        <result property="remark"    column="remark"    />
+        <result property="positionNum"    column="position_num"    />
+        <result property="ratedCapacity"    column="rated_capacity"    />
+        <result property="channelType"    column="channel_type"    />
+        <result property="electricityType"    column="electricity_type"    />
+        <result property="businessExpandType"    column="business_expand_type"    />
+        <result property="capacity"    column="capacity"    />
+        <result property="ratedPower"    column="rated_power"    />
+        <result property="periodFee"    column="period_fee"    />
+        <result property="officialRunTime"    column="official_run_time"    />
+        <result property="stationOrientation"    column="station_orientation"    />
+        <result property="stationArea"    column="station_area"    />
+        <result property="havePerson"    column="have_person"    />
+        <result property="videoMonitor"    column="video_monitor"    />
+        <result property="supportingFacilities"    column="supporting_facilities"    />
+        <result property="printerFlag"    column="printer_flag"    />
+        <result property="barrierFlag"    column="barrier_flag"    />
+        <result property="parkingLockFlag"    column="parking_lock_flag"    />
+        <result property="changeType"    column="change_type"    />
+        <result property="expression"    column="expression"    />
+        <result property="equipmentInfos"    column="equipment_infos"    />
+        <result property="buildTime"    column="build_time"    />
+        <result property="lastUpdateTime"    column="last_update_time"    />
+        <result property="construction"    column="construction"    />
+        <result property="plotId"    column="plot_id"    />
+    </resultMap>
+
+    <sql id="selectHlhtStationInfoVo">
+        select station_id, station_name, station_unique_number, equipment_owner_id, operator_id, country_code, area_code, area_code_countryside, address, station_type, station_status, station_lng, station_lat, station_tel, park_num, service_tel, site_guide, station_classification, general_application_type, match_cars, park_type, pictures, park_info, busine_hours, electricity_fee, swap_fee, service_fee, park_fee, round_the_clock, payment, support_order, remark, position_num, rated_capacity, channel_type, electricity_type, business_expand_type, capacity, rated_power, period_fee, official_run_time, station_orientation, station_area, have_person, video_monitor, supporting_facilities, printer_flag, barrier_flag, parking_lock_flag, change_type, expression, equipment_infos, build_time, last_update_time, construction, plot_id from hlht_station_info
+    </sql>
+
+    <select id="selectHlhtStationInfoList"   resultMap="HlhtStationInfoResult">
+        <include refid="selectHlhtStationInfoVo"/>
+        <where>
+            <if test="query.stationName != null  and query.stationName != ''"> and station_name like concat('%', #{query.stationName}, '%')</if>
+            <if test="query.stationUniqueNumber != null  and query.stationUniqueNumber != ''"> and station_unique_number = #{query.stationUniqueNumber}</if>
+            <if test="query.equipmentOwnerId != null  and query.equipmentOwnerId != ''"> and equipment_owner_id = #{query.equipmentOwnerId}</if>
+            <if test="query.operatorId != null  and query.operatorId != ''"> and operator_id = #{query.operatorId}</if>
+            <if test="query.countryCode != null  and query.countryCode != ''"> and country_code = #{query.countryCode}</if>
+            <if test="query.areaCode != null  and query.areaCode != ''"> and area_code = #{query.areaCode}</if>
+            <if test="query.areaCodeCountryside != null  and query.areaCodeCountryside != ''"> and area_code_countryside = #{query.areaCodeCountryside}</if>
+            <if test="query.address != null  and query.address != ''"> and address = #{query.address}</if>
+            <if test="query.stationType != null  and query.stationType != ''"> and station_type = #{query.stationType}</if>
+            <if test="query.stationStatus != null  and query.stationStatus != ''"> and station_status = #{query.stationStatus}</if>
+            <if test="query.stationLng != null "> and station_lng = #{query.stationLng}</if>
+            <if test="query.stationLat != null "> and station_lat = #{query.stationLat}</if>
+            <if test="query.stationTel != null  and query.stationTel != ''"> and station_tel = #{query.stationTel}</if>
+            <if test="query.parkNum != null "> and park_num = #{query.parkNum}</if>
+            <if test="query.serviceTel != null  and query.serviceTel != ''"> and service_tel = #{query.serviceTel}</if>
+            <if test="query.siteGuide != null  and query.siteGuide != ''"> and site_guide = #{query.siteGuide}</if>
+            <if test="query.stationClassification != null "> and station_classification = #{query.stationClassification}</if>
+            <if test="query.generalApplicationType != null "> and general_application_type = #{query.generalApplicationType}</if>
+            <if test="query.matchCars != null  and query.matchCars != ''"> and match_cars = #{query.matchCars}</if>
+            <if test="query.parkType != null "> and park_type = #{query.parkType}</if>
+            <if test="query.pictures != null  and query.pictures != ''"> and pictures = #{query.pictures}</if>
+            <if test="query.parkInfo != null  and query.parkInfo != ''"> and park_info = #{query.parkInfo}</if>
+            <if test="query.busineHours != null  and query.busineHours != ''"> and busine_hours = #{query.busineHours}</if>
+            <if test="query.electricityFee != null  and query.electricityFee != ''"> and electricity_fee = #{query.electricityFee}</if>
+            <if test="query.swapFee != null  and query.swapFee != ''"> and swap_fee = #{query.swapFee}</if>
+            <if test="query.serviceFee != null  and query.serviceFee != ''"> and service_fee = #{query.serviceFee}</if>
+            <if test="query.parkFee != null  and query.parkFee != ''"> and park_fee = #{query.parkFee}</if>
+            <if test="query.roundTheClock != null "> and round_the_clock = #{query.roundTheClock}</if>
+            <if test="query.payment != null  and query.payment != ''"> and payment = #{query.payment}</if>
+            <if test="query.supportOrder != null "> and support_order = #{query.supportOrder}</if>
+            <if test="query.positionNum != null "> and position_num = #{query.positionNum}</if>
+            <if test="query.ratedCapacity != null "> and rated_capacity = #{query.ratedCapacity}</if>
+            <if test="query.channelType != null "> and channel_type = #{query.channelType}</if>
+            <if test="query.electricityType != null "> and electricity_type = #{query.electricityType}</if>
+            <if test="query.businessExpandType != null "> and business_expand_type = #{query.businessExpandType}</if>
+            <if test="query.capacity != null "> and capacity = #{query.capacity}</if>
+            <if test="query.ratedPower != null "> and rated_power = #{query.ratedPower}</if>
+            <if test="query.periodFee != null "> and period_fee = #{query.periodFee}</if>
+            <if test="query.officialRunTime != null  and query.officialRunTime != ''"> and official_run_time = #{query.officialRunTime}</if>
+            <if test="query.stationOrientation != null "> and station_orientation = #{query.stationOrientation}</if>
+            <if test="query.stationArea != null "> and station_area = #{query.stationArea}</if>
+            <if test="query.havePerson != null "> and have_person = #{query.havePerson}</if>
+            <if test="query.videoMonitor != null "> and video_monitor = #{query.videoMonitor}</if>
+            <if test="query.supportingFacilities != null  and query.supportingFacilities != ''"> and supporting_facilities = #{query.supportingFacilities}</if>
+            <if test="query.printerFlag != null "> and printer_flag = #{query.printerFlag}</if>
+            <if test="query.barrierFlag != null "> and barrier_flag = #{query.barrierFlag}</if>
+            <if test="query.parkingLockFlag != null "> and parking_lock_flag = #{query.parkingLockFlag}</if>
+            <if test="query.changeType != null  and query.changeType != ''"> and change_type = #{query.changeType}</if>
+            <if test="query.expression != null  and query.expression != ''"> and expression = #{query.expression}</if>
+            <if test="query.equipmentInfos != null  and query.equipmentInfos != ''"> and equipment_infos = #{query.equipmentInfos}</if>
+            <if test="query.buildTime != null  and query.buildTime != ''"> and build_time = #{query.buildTime}</if>
+            <if test="query.lastUpdateTime != null "> and last_update_time = #{query.lastUpdateTime}</if>
+            <if test="query.construction != null "> and construction = #{query.construction}</if>
+            <if test="query.plotId != null "> and plot_id = #{query.plotId}</if>
+        </where>
+    </select>
+
+    <delete id="deleteHlhtStationInfoByStationIds" parameterType="String">
+        delete from hlht_station_info where station_id in
+        <foreach item="stationId" collection="array" open="(" separator="," close=")">
+            #{stationId}
+        </foreach>
+    </delete>
+</mapper>

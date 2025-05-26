@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.HlhtConnectorInfoMapper">
+
+    <resultMap type="com.hcp.operator.domain.HlhtConnectorInfo" id="HlhtConnectorInfoResult">
+        <result property="connectorId"    column="connector_id"    />
+        <result property="connectorType"    column="connector_type"    />
+        <result property="voltageUpperLimits"    column="voltage_upper_limits"    />
+        <result property="voltageLowerLimits"    column="voltage_lower_limits"    />
+        <result property="current"    column="current"    />
+        <result property="power"    column="power"    />
+        <result property="nationalStandard"    column="national_standard"    />
+        <result property="connectorName"    column="connector_name"    />
+        <result property="parkNo"    column="park_no"    />
+        <result property="constantVoltageUpperLimits"    column="constant_voltage_upper_limits"    />
+        <result property="constantVoltageLowerLimits"    column="constant_voltage_lower_limits"    />
+        <result property="constantCurrentUpperLimits"    column="constant_current_upper_limits"    />
+        <result property="constantCurrentLowerLimits"    column="constant_current_lower_limits"    />
+        <result property="auxPower"    column="aux_power"    />
+        <result property="opreateStatus"    column="opreate_status"    />
+        <result property="opreateHours"    column="opreate_hours"    />
+        <result property="powerMax"    column="power_max"    />
+        <result property="equipmentClassification"    column="equipment_classification"    />
+        <result property="equipmentId"    column="equipment_id"    />
+    </resultMap>
+
+    <sql id="selectHlhtConnectorInfoVo">
+        select connector_id, connector_type, voltage_upper_limits, voltage_lower_limits, current, power, national_standard, connector_name, park_no, constant_voltage_upper_limits, constant_voltage_lower_limits, constant_current_upper_limits, constant_current_lower_limits, aux_power, opreate_status, opreate_hours, power_max, equipment_classification, equipment_id from hlht_connector_info
+    </sql>
+
+    <select id="selectHlhtConnectorInfoList"   resultMap="HlhtConnectorInfoResult">
+        <include refid="selectHlhtConnectorInfoVo"/>
+        <where>
+            <if test="query.connectorId != null  and query.connectorId != ''"> and connector_id = #{connectorId}</if>
+            <if test="query.parkNo != null  and query.parkNo != ''"> and park_no = #{query.parkNo}</if>
+            <if test="query.opreateStatus != null "> and opreate_status = #{query.opreateStatus}</if>
+        </where>
+    </select>
+
+    <delete id="deleteHlhtConnectorInfoByConnectorIds" parameterType="String">
+        delete from hlht_connector_info where connector_id in
+        <foreach item="connectorId" collection="array" open="(" separator="," close=")">
+            #{connectorId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.modules.monitor.mapper.MonitorSysMapper">
+
+    <resultMap type="com.hcp.modules.monitor.domain.MonitorSys" id="MonitorSysResult">
+        <result property="id"    column="id"    />
+        <result property="sysName"    column="sys_name"    />
+        <result property="ip"    column="ip"    />
+        <result property="userName"    column="user_name"    />
+        <result property="userPassword"    column="user_password"    />
+        <result property="ipPort"    column="ip_port"    />
+        <result property="rsaAddr"    column="rsa_addr"    />
+        <result property="isOnline"    column="is_online"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectMonitorSysVo">
+        select a.id, a.sys_name, a.ip, a.user_name, a.user_password, a.ip_port, a.rsa_addr,
+               a.user_phone,a.user_email,a.message_type,
+               a.is_online, a.create_by,
+               a.create_time, a.update_by, a.update_time, a.remark, a.tenant_id,
+               b.cpu_info,b.mem_info,b.disk_info,b.cpu_core_info,b.disk_percent
+        from monitor_sys a
+        left join (select * from monitor_sys_info where id =( select max(id) from monitor_sys_info) ) b on a.id =b.ip_id
+    </sql>
+
+    <select id="selectMonitorSysList"   resultMap="MonitorSysResult">
+        <include refid="selectMonitorSysVo"/>
+        <where>
+            <if test="query.sysName != null  and query.sysName != ''"> and a.sys_name like concat('%', #{query.sysName}, '%')</if>
+            <if test="query.ip != null  and query.ip != ''"> and a.ip = #{query.ip}</if>
+            <if test="query.isOnline != null "> and a.is_online = #{query.isOnline}</if>
+        </where>
+    </select>
+
+    <delete id="deleteMonitorSysByIds" parameterType="String">
+        delete from monitor_sys where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

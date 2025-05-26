@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.HlhtOperatorInfoMapper">
+
+    <resultMap type="com.hcp.operator.domain.HlhtOperatorInfo" id="HlhtOperatorInfoResult">
+        <result property="operatorId"    column="operator_id"    />
+        <result property="operatorUcsId"    column="operator_ucs_id"    />
+        <result property="operatorName"    column="operator_name"    />
+        <result property="operatorTel1"    column="operator_tel1"    />
+        <result property="operatorTel2"    column="operator_tel2"    />
+        <result property="operatorRegAddress"    column="operator_reg_address"    />
+        <result property="operatorNote"    column="operator_note"    />
+        <result property="userId"    column="user_id"    />
+        <result property="isPush"    column="is_push"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectHlhtOperatorInfoVo">
+        select operator_id, operator_ucs_id, operator_name, operator_tel1, operator_tel2, operator_reg_address, operator_note, user_id, is_push, create_time from hlht_operator_info
+    </sql>
+
+    <select id="selectHlhtOperatorInfoList"   resultMap="HlhtOperatorInfoResult">
+        <include refid="selectHlhtOperatorInfoVo"/>
+        <where>
+            <if test="query.operatorName != null  and query.operatorName != ''"> and operator_name like concat('%', #{query.operatorName}, '%')</if>
+            <if test="query.startTime!=null and query.startTime!=''">
+                and date_format(create_time,'%Y-%m-%d') BETWEEN #{query.startTime} AND #{query.endTime}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteHlhtOperatorInfoByOperatorIds" parameterType="String">
+        delete from hlht_operator_info where operator_id in
+        <foreach item="operatorId" collection="array" open="(" separator="," close=")">
+            #{operatorId}
+        </foreach>
+    </delete>
+</mapper>

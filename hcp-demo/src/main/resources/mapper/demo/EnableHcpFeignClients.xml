@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.demo.mapper.DemoMapper">
+
+    <resultMap type="com.hcp.demo.domain.Demo" id="DemoResult">
+        <result property="demoId"    column="demo_id"    />
+        <result property="demoName"    column="demo_name"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectDemoVo">
+        select a.demo_id, a.demo_name, a.create_by, a.create_time, a.update_by, a.update_time, a.remark, a.tenant_id from sys_demo a
+    </sql>
+
+    <select id="selectDemoList"   resultMap="DemoResult">
+        <include refid="selectDemoVo"/>
+        left join sys_dept d on a.dept_id = d.dept_id
+        where 1=1
+        <if test="query.demoId != null "> and demo_id = #{query.demoId}</if>
+        <if test="query.demoName != null  and query.demoName != ''"> and demo_name like concat('%', #{query.demoName}, '%')</if>
+        <!-- 数据范围过滤 -->
+        ${query.params.dataScope}
+    </select>
+
+    <delete id="deleteDemoByDemoIds" parameterType="String">
+        delete from sys_demo where demo_id in
+        <foreach item="demoId" collection="array" open="(" separator="," close=")">
+            #{demoId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.system.mapper.SysOperLogMapper">
+
+	<resultMap type="com.hcp.system.api.domain.SysOperLog" id="SysOperLogResult">
+		<id     property="operId"         column="oper_id"        />
+		<result property="title"          column="title"          />
+		<result property="businessType"   column="business_type"  />
+		<result property="method"         column="method"         />
+		<result property="requestMethod"  column="request_method" />
+		<result property="operatorType"   column="operator_type"  />
+		<result property="operName"       column="oper_name"      />
+		<result property="deptName"       column="dept_name"      />
+		<result property="operUrl"        column="oper_url"       />
+		<result property="operIp"         column="oper_ip"        />
+		<result property="operParam"      column="oper_param"     />
+		<result property="jsonResult"     column="json_result"    />
+		<result property="status"         column="status"         />
+		<result property="errorMsg"       column="error_msg"      />
+		<result property="operTime"       column="oper_time"      />
+		<result property="costTime"       column="cost_time"      />
+	</resultMap>
+
+	<sql id="selectOperLogVo">
+        select oper_id, title, business_type, method, request_method, operator_type, oper_name, dept_name, oper_url, oper_ip, oper_param, json_result, status, error_msg, oper_time, cost_time
+        from sys_oper_log
+    </sql>
+
+	<insert id="insertOperlog" >
+		insert into sys_oper_log(title, business_type, method, request_method, operator_type, oper_name, dept_name, oper_url, oper_ip, oper_param, json_result, status, error_msg, cost_time, oper_time,tenant_id)
+        values (#{title}, #{businessType}, #{method}, #{requestMethod}, #{operatorType}, #{operName}, #{deptName}, #{operUrl}, #{operIp}, #{operParam}, #{jsonResult}, #{status}, #{errorMsg}, #{costTime}, sysdate()
+			,#{tenantId})
+	</insert>
+
+	<select id="selectOperLogList"  resultMap="SysOperLogResult">
+		<include refid="selectOperLogVo"/>
+		<where>
+			<if test="query.title != null and query.title != ''">
+				AND title like concat('%', #{query.title}, '%')
+			</if>
+			<if test="query.businessType != null ">
+				AND business_type = #{query.businessType}
+			</if>
+			<if test="query.businessTypes != null and query.businessTypes.length > 0">
+			    AND business_type in
+			    <foreach collection="query.businessTypes" item="businessType" open="(" separator="," close=")">
+		 			#{businessType}
+		        </foreach>
+			</if>
+			<if test="query.status != null">
+				AND status = #{query.status}
+			</if>
+			<if test="query.operName != null and query.operName != ''">
+				AND oper_name like concat('%', #{query.operName}, '%')
+			</if>
+			<if test="query.params.beginTime != null and query.params.beginTime != ''">
+				AND oper_time &gt;= #{query.params.beginTime}
+			</if>
+			<if test="query.params.endTime != null and query.params.endTime != ''">
+				AND oper_time &lt;= #{query.params.endTime}
+			</if>
+		</where>
+		order by oper_id desc
+	</select>
+
+	<delete id="deleteOperLogByIds" parameterType="Long">
+ 		delete from sys_oper_log where oper_id in
+ 		<foreach collection="array" item="operId" open="(" separator="," close=")">
+ 			#{operId}
+        </foreach>
+ 	</delete>
+
+ 	<select id="selectOperLogById" parameterType="Long" resultMap="SysOperLogResult">
+		<include refid="selectOperLogVo"/>
+		where oper_id = #{operId}
+	</select>
+
+	<update id="cleanOperLog">
+        truncate table sys_oper_log
+    </update>
+
+</mapper>

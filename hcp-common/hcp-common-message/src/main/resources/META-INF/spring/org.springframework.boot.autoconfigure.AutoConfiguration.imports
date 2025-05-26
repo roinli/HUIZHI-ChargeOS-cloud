@@ -1,0 +1,2 @@
+com.hcp.common.message.mail.EmailUtil
+com.hcp.common.message.sms.SmsUtil

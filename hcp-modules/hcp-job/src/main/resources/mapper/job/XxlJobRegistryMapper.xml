@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.job.mapper.XxlJobRegistryMapper">
+
+    <resultMap type="com.hcp.job.domain.XxlJobRegistry" id="XxlJobRegistryResult">
+        <result property="id"    column="id"    />
+        <result property="registryGroup"    column="registry_group"    />
+        <result property="registryKey"    column="registry_key"    />
+        <result property="registryValue"    column="registry_value"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectXxlJobRegistryVo">
+        select id, registry_group, registry_key, registry_value, update_time, tenant_id from xxl_job_registry
+    </sql>
+
+    <select id="selectXxlJobRegistryList"   resultMap="XxlJobRegistryResult">
+        <include refid="selectXxlJobRegistryVo"/>
+        <where>
+            <if test="query.registryGroup != null  and query.registryGroup != ''"> and registry_group = #{query.registryGroup}</if>
+            <if test="query.registryKey != null  and query.registryKey != ''"> and registry_key = #{query.registryKey}</if>
+            <if test="query.registryValue != null  and query.registryValue != ''"> and registry_value = #{query.registryValue}</if>
+            <if test="query.tenantId != null "> and tenant_id = #{query.tenantId}</if>
+        </where>
+    </select>
+
+    <delete id="deleteXxlJobRegistryByIds" parameterType="String">
+        delete from xxl_job_registry where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="findDead" parameterType="java.util.HashMap" resultType="java.lang.Integer" >
+        SELECT t.id
+        FROM xxl_job_registry AS t
+        WHERE t.update_time <![CDATA[ < ]]> DATE_ADD(#{nowTime},INTERVAL -#{timeout} SECOND)
+    </select>
+
+    <delete id="removeDead" parameterType="java.lang.Integer" >
+        DELETE FROM xxl_job_registry
+        WHERE id in
+        <foreach collection="ids" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="findAll" parameterType="java.util.HashMap" resultMap="XxlJobRegistryResult">
+        <include refid="selectXxlJobRegistryVo"/> AS t
+        WHERE t.update_time <![CDATA[ > ]]> DATE_ADD(#{nowTime},INTERVAL -#{timeout} SECOND)
+    </select>
+
+    <update id="registryUpdate" >
+        UPDATE xxl_job_registry
+        SET `update_time` = #{updateTime}
+        WHERE `registry_group` = #{registryGroup}
+          AND `registry_key` = #{registryKey}
+          AND `registry_value` = #{registryValue}
+    </update>
+
+    <insert id="registrySave" >
+        INSERT INTO xxl_job_registry( `registry_group` , `registry_key` , `registry_value`, `update_time`)
+        VALUES( #{registryGroup}  , #{registryKey} , #{registryValue}, #{updateTime})
+    </insert>
+
+    <delete id="registryDelete" >
+        DELETE FROM xxl_job_registry
+        WHERE registry_group = #{registryGroup}
+          AND registry_key = #{registryKey}
+          AND registry_value = #{registryValue}
+    </delete>
+
+</mapper>

@@ -1,0 +1,44 @@
+package ${packageName}.mapper;
+
+import java.util.List;
+import ${packageName}.domain.${ClassName};
+#if($table.crud)
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+#end
+import com.hcp.common.mybatisplus.mapper.BaseMapperX;
+import org.apache.ibatis.annotations.Param;
+/**
+ * ${functionName}Mapper接口
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+public interface ${ClassName}Mapper extends BaseMapperX<${ClassName}>
+{
+
+#if($table.crud)
+    /**
+     * 查询${functionName}列表-分页
+     *
+     * @param ${className} ${functionName}
+     * @return ${functionName}集合
+     */
+    IPage<${ClassName}> select${ClassName}List(Page page,@Param("query") ${ClassName} ${className});
+#end
+    /**
+     * 查询${functionName}列表
+     *
+     * @param ${className} ${functionName}
+     * @return ${functionName}集合
+     */
+    List<${ClassName}> select${ClassName}List(@Param("query") ${ClassName} ${className});
+
+    /**
+     * 批量删除${functionName}
+     *
+     * @param ${pkColumn.javaField}s 需要删除的数据主键集合
+     * @return 结果
+     */
+    int delete${ClassName}By${pkColumn.capJavaField}s(${pkColumn.javaType}[] ${pkColumn.javaField}s);
+}

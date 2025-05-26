@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.HeartbeatMapper">
+
+    <resultMap type="com.hcp.system.api.domain.Heartbeat" id="HeartbeatResult">
+        <result property="pileId"    column="pile_id"    />
+        <result property="deviceId"    column="device_id"    />
+        <result property="chargestate"    column="chargestate"    />
+        <result property="sourcemsg"    column="sourcemsg"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectHeartbeatVo">
+        select pile_id, device_id, chargestate, sourcemsg, create_time from c_heartbeat
+    </sql>
+
+    <select id="getById" resultMap="HeartbeatResult">
+        <include refid="selectHeartbeatVo"/> where pile_id = #{pileId}
+    </select>
+    <select id="selectHeartbeatList"   resultMap="HeartbeatResult">
+        <include refid="selectHeartbeatVo"/>
+        <where>
+            <if test="query.pileId != null  and query.pileId != ''"> and pile_id = #{query.pileId}</if>
+            <if test="query.deviceId != null  and query.deviceId != ''"> and device_id = #{query.deviceId}</if>
+        </where>
+    </select>
+
+    <delete id="deleteHeartbeatByPileIds" parameterType="String">
+        delete from c_heartbeat where pile_id in
+        <foreach item="pileId" collection="array" open="(" separator="," close=")">
+            #{pileId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByPrimaryKey" parameterType="String">
+        delete from c_heartbeat
+        where  pile_id = #{pileId,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insertHeartBeat" keyColumn="pile_id" keyProperty="pileId" parameterType="com.hcp.system.api.domain.Heartbeat" useGeneratedKeys="true">
+        insert into c_heartbeat
+        ( pile_id,device_id,chargestate
+        ,sourcemsg,create_time
+        ,create_by,update_time,update_by
+        ,tenant_id)
+        values (#{pileId,jdbcType=VARCHAR},#{deviceId,jdbcType=VARCHAR},#{chargestate,jdbcType=VARCHAR}
+               ,#{sourcemsg,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP}
+               ,#{createBy,jdbcType=VARCHAR},#{updateTime,jdbcType=TIMESTAMP},#{updateBy,jdbcType=TIMESTAMP}
+               ,#{tenantId,jdbcType=BIGINT})
+    </insert>
+    <insert id="insertSelective" keyColumn="pile_id" keyProperty="pileId" parameterType="com.hcp.system.api.domain.Heartbeat" useGeneratedKeys="true">
+        insert into c_heartbeat
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pileId != null">pile_id,</if>
+            <if test="deviceId != null">device_id,</if>
+            <if test="chargestate != null">chargestate,</if>
+            <if test="sourcemsg != null">sourcemsg,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="tenantId != null">tenant_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="pileId != null">#{pileId,jdbcType=VARCHAR},</if>
+            <if test="deviceId != null">#{deviceId,jdbcType=VARCHAR},</if>
+            <if test="chargestate != null">#{chargestate,jdbcType=VARCHAR},</if>
+            <if test="sourcemsg != null">#{sourcemsg,jdbcType=VARCHAR},</if>
+            <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="createBy != null">#{createBy,jdbcType=VARCHAR},</if>
+            <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
+            <if test="updateBy != null">#{updateBy,jdbcType=TIMESTAMP},</if>
+            <if test="tenantId != null">#{tenantId,jdbcType=BIGINT},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hcp.system.api.domain.Heartbeat">
+        update c_heartbeat
+        <set>
+            <if test="deviceId != null">
+                device_id = #{deviceId,jdbcType=VARCHAR},
+            </if>
+            <if test="chargestate != null">
+                chargestate = #{chargestate,jdbcType=VARCHAR},
+            </if>
+            <if test="sourcemsg != null">
+                sourcemsg = #{sourcemsg,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=TIMESTAMP},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+        </set>
+        where   pile_id = #{pileId,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hcp.system.api.domain.Heartbeat">
+        update c_heartbeat
+        set
+            device_id =  #{deviceId,jdbcType=VARCHAR},
+            chargestate =  #{chargestate,jdbcType=VARCHAR},
+            sourcemsg =  #{sourcemsg,jdbcType=VARCHAR},
+            create_time =  #{createTime,jdbcType=TIMESTAMP},
+            create_by =  #{createBy,jdbcType=VARCHAR},
+            update_time =  #{updateTime,jdbcType=TIMESTAMP},
+            update_by =  #{updateBy,jdbcType=TIMESTAMP},
+            tenant_id =  #{tenantId,jdbcType=BIGINT}
+        where   pile_id = #{pileId,jdbcType=VARCHAR}
+    </update>
+</mapper>

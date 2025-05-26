@@ -6,36 +6,56 @@ usage() {
 	exit 1
 }
 
-
+echo "begin package "
+#打包开始
+cd ..
+mvn clean install -Dmaven.test.skip=true
+#前端
+cd ./hcp-ui
+npm install --registry=https://registry.npmmirror.com
+npm run build:prod
+cd ../docker
 # copy sql
 echo "begin copy sql "
-cp ../sql/ry_20230223.sql ./mysql/db
-cp ../sql/ry_config_20220929.sql ./mysql/db
+cp ../sql/hcp_cloud.sql ./mysql/db
+cp ../sql/hcp_config.sql ./mysql/db
 
 # copy html
 echo "begin copy html "
-cp -r ../jingli-ui/dist/** ./nginx/html/dist
+cp -r ../hcp-ui/dist/** ./nginx/html/dist
 
 
 # copy jar
-echo "begin copy jingli-gateway "
-cp ../jingli-gateway/target/jingli-gateway.jar ./jingli/gateway/jar
+echo "begin copy hcp-gateway "
+cp ../hcp-gateway/target/hcp-gateway.jar ./hcp/gateway/jar
 
-echo "begin copy jingli-auth "
-cp ../jingli-auth/target/jingli-auth.jar ./jingli/auth/jar
+echo "begin copy hcp-auth "
+cp ../hcp-auth/target/hcp-auth.jar ./hcp/auth/jar
 
-echo "begin copy jingli-visual "
-cp ../jingli-visual/jingli-monitor/target/jingli-visual-monitor.jar  ./jingli/visual/monitor/jar
+echo "begin copy hcp-demo "
+cp ../hcp-demo/target/hcp-demo.jar ./hcp/demo/jar
 
-echo "begin copy jingli-modules-system "
-cp ../jingli-modules/jingli-system/target/jingli-modules-system.jar ./jingli/modules/system/jar
+echo "begin copy hcp-monitor "
+cp ../hcp-visual/hcp-monitor/target/hcp-monitor.jar  ./hcp/visual/monitor/jar
 
-echo "begin copy jingli-modules-file "
-cp ../jingli-modules/jingli-file/target/jingli-modules-file.jar ./jingli/modules/file/jar
+echo "begin copy hcp-system "
+cp ../hcp-modules/hcp-system/target/hcp-system.jar ./hcp/modules/system/jar
 
-echo "begin copy jingli-modules-job "
-cp ../jingli-modules/jingli-job/target/jingli-modules-job.jar ./jingli/modules/job/jar
+echo "begin copy hcp-file "
+cp ../hcp-modules/hcp-file/target/hcp-file.jar ./hcp/modules/file/jar
 
-echo "begin copy jingli-modules-gen "
-cp ../jingli-modules/jingli-gen/target/jingli-modules-gen.jar ./jingli/modules/gen/jar
+echo "begin copy hcp-gen "
+cp ../hcp-modules/hcp-gen/target/hcp-gen.jar ./hcp/modules/gen/jar
+
+echo "begin copy hcp-job "
+cp ../hcp-modules/hcp-job/target/hcp-job.jar ./hcp/modules/job/jar
+
+echo "begin copy hcp-mp "
+cp ../hcp-modules/hcp-mp/target/hcp-mp.jar ./hcp/modules/mp/jar
+
+echo "begin copy hcp-simulator "
+cp ../hcp-modules/hcp-simulator/target/hcp-simulator.jar ./hcp/modules/simulator/jar
+
+echo "begin copy hcp-operator "
+cp ../hcp-modules/hcp-operator/target/hcp-operator.jar ./hcp/modules/operator/jar
 

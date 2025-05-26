@@ -1,14 +1,14 @@
 @echo off
 echo.
-echo [ĞÅÏ¢] Ê¹ÓÃJarÃüÁîÔËĞĞModules-File¹¤³Ì¡£
+echo [ä¿¡æ¯] ä½¿ç”¨Jarå‘½ä»¤è¿è¡ŒModules-Fileå·¥ç¨‹ã€‚
 echo.
 
 cd %~dp0
-cd ../jingli-modules/jingli-file/target
+cd ../vctgo-modules/vctgo-file/target
 
-set JAVA_OPTS=-Xms512m -Xmx1024m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m
+set JAVA_OPTS=-Xms256m -Xmx512m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m
 
-java -Dfile.encoding=utf-8 %JAVA_OPTS% -jar jingli-modules-file.jar
+java -Dfile.encoding=utf-8 %JAVA_OPTS% -jar vctgo-modules-file.jar
 
 cd bin
 pause

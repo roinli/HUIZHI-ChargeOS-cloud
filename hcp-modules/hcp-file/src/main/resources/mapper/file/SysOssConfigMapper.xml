@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.file.mapper.SysOssConfigMapper">
+
+    <resultMap type="com.hcp.file.domain.SysOssConfig" id="SysOssConfigResult">
+        <result property="id"    column="id"    />
+        <result property="platformId"    column="platform_id"    />
+        <result property="accessKey"    column="access_key"    />
+        <result property="secretKey"    column="secret_key"    />
+        <result property="endPoint"    column="end_point"    />
+        <result property="bucketName"    column="bucket_name"    />
+        <result property="domain"    column="domain"    />
+        <result property="basePath"    column="base_path"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="isDefault"    column="is_default"    />
+        <result property="status"    column="status"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectSysOssConfigVo">
+        select id, platform_id, access_key, secret_key, end_point, bucket_name, domain, base_path, create_time, create_by, update_time, update_by, is_default, status, del_flag, tenant_id from sys_oss_config
+    </sql>
+
+    <select id="selectSysOssConfigList"   resultMap="SysOssConfigResult">
+        <include refid="selectSysOssConfigVo"/>
+        <where>
+            <if test="query.platformId != null  and query.platformId != ''"> and platform_id = #{query.platformId}</if>
+        </where>
+    </select>
+    <select id="allSysOssConfigList" resultType="com.hcp.file.domain.SysOssConfig">
+        <include refid="selectSysOssConfigVo"/>
+    </select>
+
+    <delete id="deleteSysOssConfigByIds" parameterType="String">
+        delete from sys_oss_config where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

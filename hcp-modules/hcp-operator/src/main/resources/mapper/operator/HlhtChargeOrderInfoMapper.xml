@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.HlhtChargeOrderInfoMapper">
+
+    <resultMap type="com.hcp.operator.domain.HlhtChargeOrderInfo" id="HlhtChargeOrderInfoResult">
+        <result property="orderNo"    column="order_no"    />
+        <result property="connectorId"    column="connector_id"    />
+        <result property="operatorId"    column="operator_id"    />
+        <result property="stationId"    column="station_id"    />
+        <result property="equipmentId"    column="equipment_id"    />
+        <result property="equipmentOwnerId"    column="equipment_owner_id"    />
+        <result property="licensePlate"    column="license_plate"    />
+        <result property="vin"    column="vin"    />
+        <result property="startSoc"    column="start_soc"    />
+        <result property="endSoc"    column="end_soc"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="cuspElect"    column="cusp_elect"    />
+        <result property="peakElect"    column="peak_elect"    />
+        <result property="flatElect"    column="flat_elect"    />
+        <result property="valleyElect"    column="valley_elect"    />
+        <result property="pushTimeStamp"    column="push_time_stamp"    />
+        <result property="totalElecMoney"    column="total_elec_money"    />
+        <result property="totalSeviceMoney"    column="total_sevice_money"    />
+        <result property="totalMoney"    column="total_money"    />
+        <result property="stopReason"    column="stop_reason"    />
+        <result property="stopDesc"    column="stop_desc"    />
+        <result property="sumPeriod"    column="sum_period"    />
+        <result property="chargeDetails"    column="charge_details"    />
+        <result property="totalPower"    column="total_power"    />
+        <result property="ordernumber"    column="ordernumber"    />
+    </resultMap>
+
+    <sql id="selectHlhtChargeOrderInfoVo">
+        select order_no, connector_id, operator_id, station_id, equipment_id, equipment_owner_id, license_plate, vin, start_soc, end_soc, start_time, end_time, cusp_elect, peak_elect, flat_elect, valley_elect, push_time_stamp, total_elec_money, total_sevice_money, total_money, stop_reason, stop_desc, sum_period, charge_details, total_power, ordernumber from hlht_charge_order_info
+    </sql>
+
+    <select id="selectHlhtChargeOrderInfoList"   resultMap="HlhtChargeOrderInfoResult">
+        <include refid="selectHlhtChargeOrderInfoVo"/>
+        <where>
+            <if test="query.connectorId != null  and query.connectorId != ''"> and connector_id = #{query.connectorId}</if>
+            <if test="query.operatorId != null  and query.operatorId != ''"> and operator_id = #{query.operatorId}</if>
+            <if test="query.stationId != null  and query.stationId != ''"> and station_id = #{query.stationId}</if>
+            <if test="query.equipmentId != null  and query.equipmentId != ''"> and equipment_id = #{query.equipmentId}</if>
+            <if test="query.equipmentOwnerId != null  and query.equipmentOwnerId != ''"> and equipment_owner_id = #{query.equipmentOwnerId}</if>
+            <if test="query.ordernumber != null  and query.ordernumber != ''"> and ordernumber = #{query.ordernumber}</if>
+            <if test="query.startTime!=null and query.startTime!=''">
+                and date_format(create_time,'%Y-%m-%d') BETWEEN #{query.startTime} AND #{query.endTime}
+            </if>
+
+        </where>
+    </select>
+
+    <delete id="deleteHlhtChargeOrderInfoByOrderNos" parameterType="String">
+        delete from hlht_charge_order_info where order_no in
+        <foreach item="orderNo" collection="array" open="(" separator="," close=")">
+            #{orderNo}
+        </foreach>
+    </delete>
+</mapper>

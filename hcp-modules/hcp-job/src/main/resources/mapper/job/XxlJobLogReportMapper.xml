@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.job.mapper.XxlJobLogReportMapper">
+
+    <resultMap type="com.hcp.job.domain.XxlJobLogReport" id="XxlJobLogReportResult">
+        <result property="id"    column="id"    />
+        <result property="triggerDay"    column="trigger_day"    />
+        <result property="runningCount"    column="running_count"    />
+        <result property="sucCount"    column="suc_count"    />
+        <result property="failCount"    column="fail_count"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectXxlJobLogReportVo">
+        select id, trigger_day, running_count, suc_count, fail_count, update_time, tenant_id from xxl_job_log_report
+    </sql>
+
+    <select id="selectXxlJobLogReportList"   resultMap="XxlJobLogReportResult">
+        <include refid="selectXxlJobLogReportVo"/>
+        <where>
+            <if test="query.triggerDay != null "> and trigger_day = #{query.triggerDay}</if>
+            <if test="query.runningCount != null "> and running_count = #{query.runningCount}</if>
+            <if test="query.sucCount != null "> and suc_count = #{query.sucCount}</if>
+            <if test="query.failCount != null "> and fail_count = #{query.failCount}</if>
+            <if test="query.tenantId != null "> and tenant_id = #{query.tenantId}</if>
+        </where>
+    </select>
+
+    <delete id="deleteXxlJobLogReportByIds" parameterType="String">
+        delete from xxl_job_log_report where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="update" >
+        UPDATE xxl_job_log_report
+        SET `running_count` = #{runningCount},
+            `suc_count` = #{sucCount},
+            `fail_count` = #{failCount}
+        WHERE `trigger_day` = #{triggerDay}
+    </update>
+
+    <insert id="save" parameterType="com.hcp.job.domain.XxlJobLogReport" useGeneratedKeys="true" keyProperty="id" >
+        INSERT INTO xxl_job_log_report (
+        `trigger_day`,
+        `running_count`,
+        `suc_count`,
+        `fail_count`
+        ) VALUES (
+        #{triggerDay},
+        #{runningCount},
+        #{sucCount},
+        #{failCount}
+        );
+        <!--<selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>-->
+    </insert>
+
+</mapper>

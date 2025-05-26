@@ -1,8 +1,14 @@
 version : '3.8'
+networks:
+  cloud-net:
+    name: cloud-net
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
 services:
-  jingli-nacos:
-    container_name: jingli-nacos
-    image: nacos/nacos-server
+  hcp-nacos:
+    container_name: hcp-nacos
+    image: nacos/nacos-server:2.0.3-slim
     build:
       context: ./nacos
     environment:
@@ -15,9 +21,12 @@ services:
       - "9848:9848"
       - "9849:9849"
     depends_on:
-      - jingli-mysql
-  jingli-mysql:
-    container_name: jingli-mysql
+      - hcp-mysql
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.6
+  hcp-mysql:
+    container_name: hcp-mysql
     image: mysql:5.7
     build:
       context: ./mysql
@@ -27,114 +36,198 @@ services:
       - ./mysql/conf:/etc/mysql/conf.d
       - ./mysql/logs:/logs
       - ./mysql/data:/var/lib/mysql
+      - ./mysql/db:/docker-entrypoint-initdb.d
     command: [
-          'mysqld',
-          '--innodb-buffer-pool-size=80M',
-          '--character-set-server=utf8mb4',
-          '--collation-server=utf8mb4_unicode_ci',
-          '--default-time-zone=+8:00',
-          '--lower-case-table-names=1'
-        ]
+      'mysqld',
+      '--innodb-buffer-pool-size=80M',
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci',
+      '--default-time-zone=+8:00',
+      '--lower-case-table-names=1'
+    ]
     environment:
-      MYSQL_DATABASE: 'ry-cloud'
+      MYSQL_DATABASE: 'vctgo_platform'
       MYSQL_ROOT_PASSWORD: password
-  jingli-redis:
-    container_name: jingli-redis
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.2
+  hcp-redis:
+    container_name: hcp-redis
     image: redis
     build:
       context: ./redis
     ports:
       - "6379:6379"
     volumes:
-      - ./redis/conf/redis.conf:/home/jingli/redis/redis.conf
+      - ./redis/conf/redis.conf:/home/hcp/redis/redis.conf
       - ./redis/data:/data
-    command: redis-server /home/jingli/redis/redis.conf
-  jingli-nginx:
-    container_name: jingli-nginx
+    command: redis-server /home/hcp/redis/redis.conf
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.3
+  hcp-nginx:
+    container_name: hcp-nginx
     image: nginx
     build:
       context: ./nginx
     ports:
-      - "80:80"
+      - "8001:8001"
     volumes:
-      - ./nginx/html/dist:/home/jingli/projects/jingli-ui
+      - ./nginx/html/dist:/home/hcp/projects/hcp-ui
       - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/logs:/var/log/nginx
       - ./nginx/conf.d:/etc/nginx/conf.d
     depends_on:
-      - jingli-gateway
+      - hcp-gateway
     links:
-      - jingli-gateway
-  jingli-gateway:
-    container_name: jingli-gateway
+      - hcp-gateway
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.4
+  hcp-gateway:
+    container_name: hcp-gateway
     build:
-      context: ./jingli/gateway
+      context: hcp/gateway
       dockerfile: dockerfile
     ports:
-      - "8080:8080"
+      - "38080:38080"
     depends_on:
-      - jingli-redis
+      - hcp-redis
     links:
-      - jingli-redis
-  jingli-auth:
-    container_name: jingli-auth
+      - hcp-redis
+    environment:
+      - NACOS_HOST=172.18.0.6
+      - NACOS_PORT=8848
+      - NETWORK_IP=192.168.1.4
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.5
+  hcp-auth:
+    container_name: hcp-auth
     build:
-      context: ./jingli/auth
+      context: hcp/auth
       dockerfile: dockerfile
     ports:
-      - "9200:9200"
+      - "39200:39200"
     depends_on:
-      - jingli-redis
+      - hcp-redis
     links:
-      - jingli-redis
-  jingli-modules-system:
-    container_name: jingli-modules-system
+      - hcp-redis
+    environment:
+      - NACOS_HOST=172.18.0.6
+      - NACOS_PORT=8848
+      - NETWORK_IP=192.168.1.4
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.7
+  hcp-system:
+    container_name: hcp-system
     build:
-      context: ./jingli/modules/system
+      context: hcp/modules/system
       dockerfile: dockerfile
     ports:
-      - "9201:9201"
+      - "39201:39201"
     depends_on:
-      - jingli-redis
-      - jingli-mysql
+      - hcp-redis
+      - hcp-mysql
     links:
-      - jingli-redis
-      - jingli-mysql
-  jingli-modules-gen:
-    container_name: jingli-modules-gen
+      - hcp-redis
+      - hcp-mysql
+      - hcp-file
+    environment:
+      - NACOS_HOST=172.18.0.6
+      - NACOS_PORT=8848
+      - NETWORK_IP=192.168.1.4
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.8
+  hcp-gen:
+    container_name: hcp-gen
     build:
-      context: ./jingli/modules/gen
+      context: hcp/modules/gen
       dockerfile: dockerfile
     ports:
-      - "9202:9202"
+      - "39202:39202"
     depends_on:
-      - jingli-mysql
+      - hcp-mysql
     links:
-      - jingli-mysql
-  jingli-modules-job:
-    container_name: jingli-modules-job
+      - hcp-mysql
+    environment:
+      - NACOS_HOST=172.18.0.6
+      - NACOS_PORT=8848
+      - NETWORK_IP=192.168.1.4
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.9
+  hcp-file:
+    container_name: hcp-file
     build:
-      context: ./jingli/modules/job
+      context: hcp/modules/file
       dockerfile: dockerfile
     ports:
-      - "9203:9203"
-    depends_on:
-      - jingli-mysql
-    links:
-      - jingli-mysql
-  jingli-modules-file:
-    container_name: jingli-modules-file
-    build:
-      context: ./jingli/modules/file
-      dockerfile: dockerfile
-    ports:
-      - "9300:9300"
+      - "39300:39300"
     volumes:
-    - ./jingli/uploadPath:/home/jingli/uploadPath
-  jingli-visual-monitor:
-    container_name: jingli-visual-monitor
+      - ./vctgo/uploadPath:/home/hcp/uploadPath
+    environment:
+      - NACOS_HOST=172.18.0.6
+      - NACOS_PORT=8848
+      - NETWORK_IP=192.168.1.4
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.10
+  hcp-monitor:
+    container_name: hcp-monitor
     build:
-      context: ./jingli/visual/monitor
+      context: hcp/visual/monitor
       dockerfile: dockerfile
     ports:
-      - "9100:9100"
+      - "39100:39100"
+    environment:
+      - NACOS_HOST=172.18.0.6
+      - NACOS_PORT=8848
+      - NETWORK_IP=192.168.1.4
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.11
+  hcp-demo:
+    container_name: hcp-demo
+    build:
+      context: hcp/demo
+      dockerfile: dockerfile
+    ports:
+      - "39203:39203"
+    depends_on:
+      - hcp-redis
+      - hcp-mysql
+    links:
+      - hcp-redis
+      - hcp-mysql
+      - hcp-file
+    environment:
+      - NACOS_HOST=172.18.0.6
+      - NACOS_PORT=8848
+      - NETWORK_IP=192.168.1.4
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.12
+  hcp-job:
+    container_name: hcp-job
+    build:
+      context: hcp/modules/job
+      dockerfile: dockerfile
+    ports:
+      - "39204:39204"
+    depends_on:
+      - hcp-redis
+      - hcp-mysql
+    links:
+      - hcp-redis
+      - hcp-mysql
+      - hcp-file
+    environment:
+      - NACOS_HOST=172.18.0.6
+      - NACOS_PORT=8848
+      - NETWORK_IP=192.168.1.4
+    networks:
+      cloud-net:
+        ipv4_address: 172.18.0.13

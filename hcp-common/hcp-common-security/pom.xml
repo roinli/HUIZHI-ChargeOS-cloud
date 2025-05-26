@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.zkhz</groupId>
+        <artifactId>hcp-common</artifactId>
+        <version>1.2.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>hcp-common-security</artifactId>
+
+    <description>
+        hcp-common-security安全模块
+    </description>
+
+    <dependencies>
+
+        <!-- Spring Web -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+        </dependency>
+
+        <!-- hcp Api System -->
+        <dependency>
+            <groupId>com.zkhz</groupId>
+            <artifactId>hcp-api-system</artifactId>
+        </dependency>
+
+        <!-- hcp Common Redis-->
+        <dependency>
+            <groupId>com.zkhz</groupId>
+            <artifactId>hcp-common-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>eu.bitwalker</groupId>
+            <artifactId>UserAgentUtils</artifactId>
+        </dependency>
+
+    </dependencies>
+
+</project>

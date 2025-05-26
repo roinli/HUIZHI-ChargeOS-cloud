@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.system.mapper.SysTenantMapper">
+
+    <resultMap type="com.hcp.system.domain.SysTenant" id="SysTenantResult">
+        <result property="id"    column="id"    />
+        <result property="tenantName"    column="tenant_name"    />
+        <result property="userName"    column="user_name"    />
+        <result property="userPhone"    column="user_phone"    />
+        <result property="userEmail"    column="user_email"    />
+        <result property="tenantPackage"    column="tenant_package"    />
+        <result property="tenantTime"    column="tenant_time"    />
+        <result property="status"    column="status"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectSysTenantVo">
+        select id, tenant_name, user_name, user_phone, user_email, tenant_package, tenant_time, status, del_flag, create_by, create_time, update_by, update_time, remark from sys_tenant
+    </sql>
+
+    <select id="selectSysTenantList"   resultMap="SysTenantResult">
+        <include refid="selectSysTenantVo"/>
+        <where>
+            <if test="query.tenantName != null  and query.tenantName != ''"> and tenant_name like concat('%', #{query.tenantName}, '%')</if>
+            <if test="query.userName != null  and query.userName != ''"> and user_name like concat('%', #{query.userName}, '%')</if>
+            <if test="query.userPhone != null  and query.userPhone != ''"> and user_phone = #{query.userPhone}</if>
+            <if test="query.params.beginTenantTime != null and query.params.beginTenantTime != '' and query.params.endTenantTime != null and query.params.endTenantTime != ''">
+             and tenant_time between #{query.params.beginTenantTime} and #{query.params.endTenantTime}</if>
+            <if test="query.status != null  and query.status != ''"> and status = #{query.status}</if>
+        </where>
+    </select>
+
+    <delete id="deleteSysTenantByIds" parameterType="String">
+        delete from sys_tenant where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.MemberMapper">
+
+    <resultMap type="com.hcp.system.api.domain.Member" id="MemberResult">
+        <result property="memberId"    column="member_id"    />
+        <result property="weixinOpenid"    column="weixin_openid"    />
+        <result property="mobile"    column="mobile"    />
+        <result property="headImage"    column="head_image"    />
+        <result property="userName"    column="user_name"    />
+        <result property="realName"    column="real_name"    />
+        <result property="createtime"    column="createtime"    />
+        <result property="unionId"    column="union_id"    />
+        <result property="appOpenId"    column="app_open_id"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectMemberVo">
+        select member_id, weixin_openid, mobile, head_image, user_name, real_name, createtime, union_id, app_open_id, tenant_id from c_member
+    </sql>
+
+    <select id="selectMemberList"   resultMap="MemberResult">
+        <include refid="selectMemberVo"/>
+        <where>
+            <if test="query.weixinOpenid != null  and query.weixinOpenid != ''"> and weixin_openid = #{query.weixinOpenid}</if>
+            <if test="query.mobile != null  and query.mobile != ''"> and mobile = #{query.mobile}</if>
+            <if test="query.userName != null  and query.userName != ''"> and user_name like concat('%', #{query.userName}, '%')</if>
+            <if test="query.realName != null  and query.realName != ''"> and real_name like concat('%', #{query.realName}, '%')</if>
+        </where>
+    </select>
+
+    <select id="selectByMemberId" resultType="com.hcp.system.api.domain.Member" parameterType="java.lang.Long">
+        <include refid="selectMemberVo"/> where member_id = #{memberId}
+    </select>
+    <select id="selectByOpenId" resultType="com.hcp.system.api.domain.Member" parameterType="java.lang.String">
+        <include refid="selectMemberVo"/> where weixin_openid = #{openId}
+    </select>
+
+    <delete id="deleteMemberByMemberIds" parameterType="String">
+        delete from c_member where member_id in
+        <foreach item="memberId" collection="array" open="(" separator="," close=")">
+            #{memberId}
+        </foreach>
+    </delete>
+</mapper>

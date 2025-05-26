@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright 1999-2018 Alibaba Group Holding Ltd.
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+ -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.zkhz</groupId>
+		<artifactId>hcp</artifactId>
+		<version>1.2.2</version>
+	</parent>
+
+	<artifactId>hcp-register</artifactId>
+	<packaging>jar</packaging>
+	<name>hcp-register</name>
+	<description>nacos 注册配置中心</description>
+
+	<properties>
+		<nacos.version>2.1.1</nacos.version>
+		<hutool.version>5.7.19</hutool.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>io.springboot.nacos</groupId>
+			<artifactId>nacos-config</artifactId>
+			<version>${nacos.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springboot.nacos</groupId>
+			<artifactId>nacos-naming</artifactId>
+			<version>${nacos.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springboot.nacos</groupId>
+			<artifactId>nacos-istio</artifactId>
+			<version>${nacos.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springboot.nacos</groupId>
+			<artifactId>nacos-plugin-default-impl</artifactId>
+			<version>${nacos.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springboot.nacos</groupId>
+			<artifactId>nacos-istio</artifactId>
+			<version>${nacos.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>cn.hutool</groupId>
+			<artifactId>hutool-system</artifactId>
+			<version>${hutool.version}</version>
+		</dependency>
+
+	</dependencies>
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>2.3.3.RELEASE</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>**/*.woff</exclude>
+					<exclude>**/*.woff2</exclude>
+					<exclude>**/*.ttf</exclude>
+				</excludes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>**/*.woff</include>
+					<include>**/*.woff2</include>
+					<include>**/*.ttf</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
+</project>

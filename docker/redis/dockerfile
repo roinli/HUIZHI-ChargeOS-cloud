@@ -1,13 +1,13 @@
 # 基础镜像
 FROM redis
 # author
-MAINTAINER jingli
+MAINTAINER hcp
 
 # 挂载目录
-VOLUME /home/jingli/redis
+VOLUME /home/hcp/redis
 # 创建目录
-RUN mkdir -p /home/jingli/redis
+RUN mkdir -p /home/hcp/redis
 # 指定路径
-WORKDIR /home/jingli/redis
+WORKDIR /home/hcp/redis
 # 复制conf文件到路径
-COPY ./conf/redis.conf /home/jingli/redis/redis.conf
+COPY ./conf/redis.conf /home/hcp/redis/redis.conf

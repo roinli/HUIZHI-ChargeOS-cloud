@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>com.zkhz</groupId>
+        <artifactId>hcp</artifactId>
+        <version>1.2.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>hcp-common-log</module>
+        <module>hcp-common-core</module>
+        <module>hcp-common-redis</module>
+        <module>hcp-common-seata</module>
+        <module>hcp-common-swagger</module>
+        <module>hcp-common-security</module>
+        <module>hcp-common-datascope</module>
+		<module>hcp-common-datasource</module>
+        <module>hcp-common-mybatisplus</module>
+        <module>hcp-common-message</module>
+    </modules>
+
+    <artifactId>hcp-common</artifactId>
+    <packaging>pom</packaging>
+
+    <description>
+	    hcp-common通用模块
+    </description>
+
+</project>

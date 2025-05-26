@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.job.mapper.XxlJobLogMapper">
+
+    <resultMap type="com.hcp.job.domain.XxlJobLog" id="XxlJobLogResult">
+        <result property="id"    column="id"    />
+        <result property="jobGroup"    column="job_group"    />
+        <result property="jobId"    column="job_id"    />
+        <result property="executorAddress"    column="executor_address"    />
+        <result property="executorHandler"    column="executor_handler"    />
+        <result property="executorParam"    column="executor_param"    />
+        <result property="executorShardingParam"    column="executor_sharding_param"    />
+        <result property="executorFailRetryCount"    column="executor_fail_retry_count"    />
+        <result property="triggerTime"    column="trigger_time"    />
+        <result property="triggerCode"    column="trigger_code"    />
+        <result property="triggerMsg"    column="trigger_msg"    />
+        <result property="handleTime"    column="handle_time"    />
+        <result property="handleCode"    column="handle_code"    />
+        <result property="handleMsg"    column="handle_msg"    />
+        <result property="alarmStatus"    column="alarm_status"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectXxlJobLogVo">
+        select id, job_group, job_id, executor_address, executor_handler, executor_param, executor_sharding_param, executor_fail_retry_count, trigger_time, trigger_code, trigger_msg, handle_time, handle_code, handle_msg, alarm_status, tenant_id from xxl_job_log
+    </sql>
+
+    <select id="selectXxlJobLogList"   resultMap="XxlJobLogResult">
+        <include refid="selectXxlJobLogVo"/>
+        <where>
+            <if test="query.jobGroup != null "> and job_group = #{query.jobGroup}</if>
+            <if test="query.jobId != null "> and job_id = #{query.jobId}</if>
+            <if test="query.executorAddress != null  and query.executorAddress != ''"> and executor_address = #{query.executorAddress}</if>
+            <if test="query.executorHandler != null  and query.executorHandler != ''"> and executor_handler = #{query.executorHandler}</if>
+            <if test="query.executorParam != null  and query.executorParam != ''"> and executor_param = #{query.executorParam}</if>
+            <if test="query.executorShardingParam != null  and query.executorShardingParam != ''"> and executor_sharding_param = #{query.executorShardingParam}</if>
+            <if test="query.executorFailRetryCount != null "> and executor_fail_retry_count = #{query.executorFailRetryCount}</if>
+            <if test="query.triggerTime != null "> and trigger_time = #{query.triggerTime}</if>
+            <if test="query.triggerMsg != null  and query.triggerMsg != ''"> and trigger_msg = #{query.triggerMsg}</if>
+            <if test="query.handleTime != null "> and handle_time = #{query.handleTime}</if>
+            <if test="query.handleMsg != null  and query.handleMsg != ''"> and handle_msg = #{query.handleMsg}</if>
+            <if test="query.alarmStatus != null "> and alarm_status = #{query.alarmStatus}</if>
+            <if test="query.tenantId != null "> and tenant_id = #{query.tenantId}</if>
+            <if test="query.logStatus == 1" >
+                AND handle_code = 200
+            </if>
+            <if test="query.logStatus == 2" >
+                AND (
+                trigger_code NOT IN (0, 200) OR
+                handle_code NOT IN (0, 200)
+                )
+            </if>
+            <if test="query.logStatus == 3" >
+                AND trigger_code = 200
+                AND handle_code = 0
+            </if>
+
+            <if test="query.triggerTimeStart != null and query.triggerTimeStart != ''"> and DATE_FORMAT(trigger_time, '%Y-%m-%d') >= #{query.triggerTimeStart}</if>
+            <if test="query.triggerTimeEnd != null and query.triggerTimeEnd != ''"> and DATE_FORMAT(trigger_time, '%Y-%m-%d') <![CDATA[ <= ]]> #{query.triggerTimeEnd}</if>
+        </where>
+        ORDER BY trigger_time DESC
+    </select>
+
+    <delete id="deleteXxlJobLogByIds" parameterType="String">
+        delete from xxl_job_log where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <update id="updateAlarmStatus" >
+        UPDATE xxl_job_log
+        SET
+            `alarm_status` = #{newAlarmStatus}
+        WHERE `id`= #{logId} AND `alarm_status` = #{oldAlarmStatus}
+    </update>
+    <update id="updateTriggerInfo" >
+        UPDATE xxl_job_log
+        SET
+            `trigger_time`= #{triggerTime},
+            `trigger_code`= #{triggerCode},
+            `trigger_msg`= #{triggerMsg},
+            `executor_address`= #{executorAddress},
+            `executor_handler`=#{executorHandler},
+            `executor_param`= #{executorParam},
+            `executor_sharding_param`= #{executorShardingParam},
+            `executor_fail_retry_count`= #{executorFailRetryCount}
+        WHERE `id`= #{id}
+    </update>
+
+    <select id="load" parameterType="java.lang.Long" resultMap="XxlJobLogResult">
+        <include refid="selectXxlJobLogVo"/> AS t
+        WHERE t.id = #{id}
+    </select>
+
+    <select id="findLostJobIds" resultType="long" >
+        SELECT
+            t.id
+        FROM
+            xxl_job_log t
+                LEFT JOIN xxl_job_registry t2 ON t.executor_address = t2.registry_value
+        WHERE
+            t.trigger_code = 200
+          AND t.handle_code = 0
+          AND t.trigger_time <![CDATA[ <= ]]> #{losedTime}
+          AND t2.id IS NULL;
+    </select>
+
+    <select id="findFailJobLogIds" resultType="long" >
+        SELECT id FROM `xxl_job_log`
+        WHERE !(
+            (trigger_code in (0, 200) and handle_code = 0)
+           OR
+            (handle_code = 200)
+            )
+          AND `alarm_status` = 0
+        ORDER BY id ASC
+            LIMIT #{pagesize}
+    </select>
+
+    <update id="updateHandleInfo">
+        UPDATE xxl_job_log
+        SET
+            `handle_time`= #{handleTime},
+            `handle_code`= #{handleCode},
+            `handle_msg`= #{handleMsg}
+        WHERE `id`= #{id}
+    </update>
+
+    <select id="findLogReport" resultType="java.util.Map" >
+        SELECT
+            COUNT(handle_code) triggerDayCount,
+            SUM(CASE WHEN (trigger_code in (0, 200) and handle_code = 0) then 1 else 0 end) as triggerDayCountRunning,
+            SUM(CASE WHEN handle_code = 200 then 1 else 0 end) as triggerDayCountSuc
+        FROM xxl_job_log
+        WHERE trigger_time BETWEEN #{from} and #{to}
+    </select>
+
+    <select id="findClearLogIds" resultType="long" >
+        SELECT id FROM xxl_job_log
+        <trim prefix="WHERE" prefixOverrides="AND | OR" >
+            <if test="jobGroup gt 0">
+                AND job_group = #{jobGroup}
+            </if>
+            <if test="jobId gt 0">
+                AND job_id = #{jobId}
+            </if>
+            <if test="clearBeforeTime != null">
+                AND trigger_time <![CDATA[ <= ]]> #{clearBeforeTime}
+            </if>
+            <if test="clearBeforeNum gt 0">
+                AND id NOT in(
+                SELECT id FROM(
+                SELECT id FROM xxl_job_log AS t
+                <trim prefix="WHERE" prefixOverrides="AND | OR" >
+                    <if test="jobGroup gt 0">
+                        AND t.job_group = #{jobGroup}
+                    </if>
+                    <if test="jobId gt 0">
+                        AND t.job_id = #{jobId}
+                    </if>
+                </trim>
+                ORDER BY t.trigger_time desc
+                LIMIT 0, #{clearBeforeNum}
+                ) t1
+                )
+            </if>
+        </trim>
+        order by id asc
+        LIMIT #{pagesize}
+    </select>
+
+    <delete id="clearLog" >
+        delete from xxl_job_log
+        WHERE id in
+        <foreach collection="logIds" item="item" open="(" close=")" separator="," >
+            #{item}
+        </foreach>
+    </delete>
+
+    <insert id="save" parameterType="com.hcp.job.domain.XxlJobLog" useGeneratedKeys="true" keyProperty="id" >
+        INSERT INTO xxl_job_log (
+        `job_group`,
+        `job_id`,
+        `trigger_time`,
+        `trigger_code`,
+        `handle_code`
+        ) VALUES (
+        #{jobGroup},
+        #{jobId},
+        #{triggerTime},
+        #{triggerCode},
+        #{handleCode}
+        );
+        <!--<selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>-->
+    </insert>
+
+</mapper>
