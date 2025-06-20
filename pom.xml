@@ -4,37 +4,79 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.jingli</groupId>
-    <artifactId>jingli</artifactId>
-    <version>3.6.2</version>
+    <groupId>com.zkhz</groupId>
+    <artifactId>hcp</artifactId>
+    <version>1.2.2</version>
+    <packaging>pom</packaging>
+    <name>hcp</name>
+    <url>https://www.hcp.cn</url>
+    <description>hcp微服务系统</description>
 
-    <name>jingli</name>
-    <url>http://wenhui.nxptdn.com</url>
-    <description>李文慧的充电桩系统18601938676</description>
+    <modules>
+        <module>hcp-auth</module>
+        <module>hcp-gateway</module>
+        <module>hcp-visual</module>
+        <module>hcp-modules</module>
+        <module>hcp-api</module>
+        <module>hcp-common</module>
+        <module>hcp-demo</module>
+        <module>hcp-register</module>
+    </modules>
+    <repositories>
+        <repository>
+            <id>aliMaven</id>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <name>aliYun maven</name>
+            <url>https://maven.aliyun.com/repository/public/</url>
+        </repository>
+    </repositories>
 
     <properties>
-        <jingli.version>3.6.2</jingli.version>
+        <hcp.version>1.2.2</hcp.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
-        <spring-boot.version>2.7.7</spring-boot.version>
-        <spring-cloud.version>2021.0.5</spring-cloud.version>
-        <spring-cloud-alibaba.version>2021.0.4.0</spring-cloud-alibaba.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
+        <spring-cloud.version>2021.0.8</spring-cloud.version>
+        <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
+        <alibaba.nacos.version>2.1.1</alibaba.nacos.version>
         <spring-boot-admin.version>2.7.10</spring-boot-admin.version>
+        <spring-boot.mybatis.plus>3.5.7</spring-boot.mybatis.plus>
         <swagger.fox.version>3.0.0</swagger.fox.version>
         <swagger.core.version>1.6.2</swagger.core.version>
         <tobato.version>1.27.2</tobato.version>
+        <hutool.version>5.8.31</hutool.version>
         <kaptcha.version>2.3.3</kaptcha.version>
-        <pagehelper.boot.version>1.4.6</pagehelper.boot.version>
+        <pagehelper.boot.version>1.4.7</pagehelper.boot.version>
+        <alibaba.seata.version>1.5.1</alibaba.seata.version>
         <druid.version>1.2.16</druid.version>
         <dynamic-ds.version>3.5.2</dynamic-ds.version>
-        <commons.io.version>2.11.0</commons.io.version>
+        <commons.io.version>2.13.0</commons.io.version>
         <velocity.version>2.3</velocity.version>
-        <fastjson.version>2.0.25</fastjson.version>
+        <fastjson.version>2.0.43</fastjson.version>
         <jjwt.version>0.9.1</jjwt.version>
-        <minio.version>8.2.2</minio.version>
         <poi.version>4.1.2</poi.version>
-        <transmittable-thread-local.version>2.14.2</transmittable-thread-local.version>
+        <transmittable-thread-local.version>2.14.4</transmittable-thread-local.version>
+        <lombok.version>1.18.22</lombok.version>
+        <oshi.version>6.1.2</oshi.version>
+        <ganymed-ssh2.version>build250</ganymed-ssh2.version>
+        <jsch.version>0.1.55</jsch.version>
+        <aliyun-java-sdk-core.version>4.6.0</aliyun-java-sdk-core.version>
+        <aliyun-java-sdk-dysmsapi.version>2.2.1</aliyun-java-sdk-dysmsapi.version>
+        <bitwalker.version>1.21</bitwalker.version>
+        <filestorage.version>2.2.1</filestorage.version>
+        <minio.version>8.5.2</minio.version>
+        <huawei.obs.version>3.22.12</huawei.obs.version>
+        <aliyun.oss.version>3.16.1</aliyun.oss.version>
+        <qiniu.kodo.version>7.12.1</qiniu.kodo.version>
+        <tencent.cos.version>5.6.137</tencent.cos.version>
+        <baidu.bos.version>0.10.251</baidu.bos.version>
+        <wxjava.version>4.6.0</wxjava.version>
     </properties>
 
     <!-- 依赖声明 -->
@@ -59,6 +101,20 @@
                 <scope>import</scope>
             </dependency>
 
+            <!-- Alibaba Nacos 配置 -->
+            <dependency>
+                <groupId>com.alibaba.nacos</groupId>
+                <artifactId>nacos-client</artifactId>
+                <version>${alibaba.nacos.version}</version>
+            </dependency>
+
+            <!-- Alibaba Seata 配置 -->
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-spring-boot-starter</artifactId>
+                <version>${alibaba.seata.version}</version>
+            </dependency>
+
             <!-- SpringBoot 依赖配置 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -68,12 +124,28 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-mail</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+
+
             <!-- FastDFS 分布式文件系统 -->
             <dependency>
                 <groupId>com.github.tobato</groupId>
                 <artifactId>fastdfs-client</artifactId>
                 <version>${tobato.version}</version>
             </dependency>
+
+            <!-- Mybatis 依赖配置 -->
+<!--            <dependency>-->
+<!--                <groupId>org.mybatis.spring.boot</groupId>-->
+<!--                <artifactId>mybatis-spring-boot-starter</artifactId>-->
+<!--                <version>${spring-boot.mybatis}</version>-->
+<!--            </dependency>-->
+
+
 
             <!-- Swagger 依赖配置 -->
             <dependency>
@@ -94,13 +166,6 @@
                 <version>${kaptcha.version}</version>
             </dependency>
 
-            <!-- pagehelper 分页插件 -->
-            <dependency>
-                <groupId>com.github.pagehelper</groupId>
-                <artifactId>pagehelper-spring-boot-starter</artifactId>
-                <version>${pagehelper.boot.version}</version>
-            </dependency>
-
             <!-- io常用工具类 -->
             <dependency>
                 <groupId>commons-io</groupId>
@@ -115,12 +180,14 @@
                 <version>${poi.version}</version>
             </dependency>
 
+
             <!-- 代码生成使用模板 -->
             <dependency>
                 <groupId>org.apache.velocity</groupId>
                 <artifactId>velocity-engine-core</artifactId>
                 <version>${velocity.version}</version>
             </dependency>
+
 
             <!-- JSON 解析器和生成器 -->
             <dependency>
@@ -142,82 +209,168 @@
                 <artifactId>transmittable-thread-local</artifactId>
                 <version>${transmittable-thread-local.version}</version>
             </dependency>
-
+            <!-- 阿里云短信-->
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
+                <version>${aliyun-java-sdk-dysmsapi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun</groupId>
+                <artifactId>aliyun-java-sdk-core</artifactId>
+                <version>${aliyun-java-sdk-core.version}</version>
+            </dependency>
             <!-- 核心模块 -->
             <dependency>
-                <groupId>com.jingli</groupId>
-                <artifactId>jingli-common-core</artifactId>
-                <version>${jingli.version}</version>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-common-core</artifactId>
+                <version>${hcp.version}</version>
             </dependency>
 
             <!-- 接口模块 -->
             <dependency>
-                <groupId>com.jingli</groupId>
-                <artifactId>jingli-common-swagger</artifactId>
-                <version>${jingli.version}</version>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-common-swagger</artifactId>
+                <version>${hcp.version}</version>
             </dependency>
 
             <!-- 安全模块 -->
             <dependency>
-                <groupId>com.jingli</groupId>
-                <artifactId>jingli-common-security</artifactId>
-                <version>${jingli.version}</version>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-common-security</artifactId>
+                <version>${hcp.version}</version>
             </dependency>
 
             <!-- 权限范围 -->
             <dependency>
-                <groupId>com.jingli</groupId>
-                <artifactId>jingli-common-datascope</artifactId>
-                <version>${jingli.version}</version>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-common-datascope</artifactId>
+                <version>${hcp.version}</version>
             </dependency>
 
             <!-- 多数据源 -->
             <dependency>
-                <groupId>com.jingli</groupId>
-                <artifactId>jingli-common-datasource</artifactId>
-                <version>${jingli.version}</version>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-common-datasource</artifactId>
+                <version>${hcp.version}</version>
             </dependency>
 
             <!-- 分布式事务 -->
             <dependency>
-                <groupId>com.jingli</groupId>
-                <artifactId>jingli-common-seata</artifactId>
-                <version>${jingli.version}</version>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-common-seata</artifactId>
+                <version>${hcp.version}</version>
             </dependency>
 
             <!-- 日志记录 -->
             <dependency>
-                <groupId>com.jingli</groupId>
-                <artifactId>jingli-common-log</artifactId>
-                <version>${jingli.version}</version>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-common-log</artifactId>
+                <version>${hcp.version}</version>
             </dependency>
 
             <!-- 缓存服务 -->
             <dependency>
-                <groupId>com.jingli</groupId>
-                <artifactId>jingli-common-redis</artifactId>
-                <version>${jingli.version}</version>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-common-redis</artifactId>
+                <version>${hcp.version}</version>
             </dependency>
 
             <!-- 系统接口 -->
             <dependency>
-                <groupId>com.jingli</groupId>
-                <artifactId>jingli-api-system</artifactId>
-                <version>${jingli.version}</version>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-api-system</artifactId>
+                <version>${hcp.version}</version>
             </dependency>
 
+            <!-- 租户功能 -->
+            <dependency>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-common-mybatisplus</artifactId>
+                <version>${hcp.version}</version>
+            </dependency>
+
+            <!-- 通知功能 -->
+            <dependency>
+                <groupId>com.zkhz</groupId>
+                <artifactId>hcp-common-message</artifactId>
+                <version>${hcp.version}</version>
+            </dependency>
+
+            <!-- 获取系统信息 -->
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core</artifactId>
+                <version>${oshi.version}</version>
+            </dependency>
+
+            <!-- linux链接，远程操作服务器-->
+            <dependency>
+                <groupId>com.jcraft</groupId>
+                <artifactId>jsch</artifactId>
+                <version>${jsch.version}</version>
+            </dependency>
+            <!-- 解析客户端操作系统、浏览器等 -->
+            <dependency>
+                <groupId>eu.bitwalker</groupId>
+                <artifactId>UserAgentUtils</artifactId>
+                <version>${bitwalker.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.dromara.x-file-storage</groupId>
+                <artifactId>x-file-storage-spring</artifactId>
+                <version>${filestorage.version}</version>
+            </dependency>
+
+<!--            <dependency>-->
+<!--                <groupId>org.dromara.x-file-storage</groupId>-->
+<!--                <artifactId>x-file-storage-core</artifactId>-->
+<!--                <version>${filestorage.version}</version>-->
+<!--            </dependency>-->
+            <dependency>
+                <groupId>com.huaweicloud</groupId>
+                <artifactId>esdk-obs-java</artifactId>
+                <version>${huawei.obs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aliyun.oss</groupId>
+                <artifactId>aliyun-sdk-oss</artifactId>
+                <version>${aliyun.oss.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.qiniu</groupId>
+                <artifactId>qiniu-java-sdk</artifactId>
+                <version>${qiniu.kodo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.qcloud</groupId>
+                <artifactId>cos_api</artifactId>
+                <version>${tencent.cos.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baidubce</groupId>
+                <artifactId>bce-java-sdk</artifactId>
+                <version>${baidu.bos.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.binarywang</groupId>
+                <artifactId>weixin-java-miniapp</artifactId>
+                <version>${wxjava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.binarywang</groupId>
+                <artifactId>weixin-java-pay</artifactId>
+                <version>${wxjava.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
-    <modules>
-        <module>jingli-auth</module>
-        <module>jingli-gateway</module>
-        <module>jingli-visual</module>
-        <module>jingli-modules</module>
-        <module>jingli-api</module>
-        <module>jingli-common</module>
-    </modules>
-    <packaging>pom</packaging>
+
 
     <dependencies>
         <!-- bootstrap 启动器 -->
@@ -225,9 +378,48 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
+        <!-- spring boot 配置所需依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!--lombok-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+
+        <!-- mybatis-plus 增强CRUD -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${spring-boot.mybatis.plus}</version>
+        </dependency>
+<!--        &lt;!&ndash; pagehelper 分页插件 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.pagehelper</groupId>-->
+<!--            <artifactId>pagehelper-spring-boot-starter</artifactId>-->
+<!--            <version>${pagehelper.boot.version}</version>-->
+<!--        </dependency>-->
+        <!-- hutool -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>${hutool.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>
+        <finalName>${project.name}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -257,29 +449,40 @@
         </pluginManagement>
     </build>
 
-    <repositories>
-        <repository>
-            <id>public</id>
-            <name>aliyun nexus</name>
-            <url>https://maven.aliyun.com/repository/public</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>public</id>
-            <name>aliyun nexus</name>
-            <url>https://maven.aliyun.com/repository/public</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </pluginRepository>
-    </pluginRepositories>
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <!-- 环境标识，需要与配置文件的名称相对应 -->
+                <profiles.active>dev</profiles.active>
+            </properties>
+            <activation>
+                <!-- 默认环境 -->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>local</id>
+            <properties>
+                <!-- 环境标识，需要与配置文件的名称相对应 -->
+                <profiles.active>local</profiles.active>
+            </properties>
+            <activation>
+                <!-- 默认环境 -->
+                <activeByDefault>false</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <!-- 环境标识，需要与配置文件的名称相对应 -->
+                <profiles.active>prod</profiles.active>
+            </properties>
+            <activation>
+                <!-- 默认环境 -->
+                <activeByDefault>false</activeByDefault>
+            </activation>
+        </profile>
+    </profiles>
 
 </project>

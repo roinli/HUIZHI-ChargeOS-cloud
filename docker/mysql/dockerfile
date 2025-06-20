@@ -1,7 +1,7 @@
 # 基础镜像
-FROM mysql:5.7
+FROM mysql:8.0.36
 # author
-MAINTAINER jingli
+MAINTAINER hcp
 
 # 执行sql脚本
 ADD ./db/*.sql /docker-entrypoint-initdb.d/

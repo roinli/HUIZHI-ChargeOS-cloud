@@ -1,14 +1,14 @@
 @echo off
 echo.
-echo [ĞÅÏ¢] Ê¹ÓÃJarÃüÁîÔËĞĞGateway¹¤³Ì¡£
+echo [ä¿¡æ¯] ä½¿ç”¨Jarå‘½ä»¤è¿è¡ŒGatewayå·¥ç¨‹ã€‚
 echo.
 
 cd %~dp0
-cd ../jingli-gateway/target
+cd ../vctgo-gateway/target
 
 set JAVA_OPTS=-Xms512m -Xmx1024m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m
 
-java -Dfile.encoding=utf-8 %JAVA_OPTS% -jar jingli-gateway.jar
+java -Dfile.encoding=utf-8 %JAVA_OPTS% -jar vctgo-gateway.jar
 
 cd bin
 pause

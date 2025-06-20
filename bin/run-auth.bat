@@ -1,14 +1,14 @@
 @echo off
 echo.
-echo [ĞÅÏ¢] Ê¹ÓÃJarÃüÁîÔËĞĞAuth¹¤³Ì¡£
+echo [ä¿¡æ¯] ä½¿ç”¨Jarå‘½ä»¤è¿è¡ŒAuthå·¥ç¨‹ã€‚
 echo.
 
 cd %~dp0
-cd ../jingli-auth/target
+cd ../vctgo-auth/target
 
-set JAVA_OPTS=-Xms512m -Xmx1024m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m
+set JAVA_OPTS=-Xms256m -Xmx512m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m
 
-java -Dfile.encoding=utf-8 %JAVA_OPTS% -jar jingli-auth.jar
+java -Dfile.encoding=utf-8 %JAVA_OPTS% -jar vctgo-auth.jar
 
 cd bin
 pause

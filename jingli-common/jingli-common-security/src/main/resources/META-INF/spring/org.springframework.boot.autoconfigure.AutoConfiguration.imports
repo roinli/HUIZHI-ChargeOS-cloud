@@ -1,5 +1,0 @@
-com.jingli.common.security.config.WebMvcConfig
-com.jingli.common.security.service.TokenService
-com.jingli.common.security.aspect.PreAuthorizeAspect
-com.jingli.common.security.aspect.InnerAuthAspect
-com.jingli.common.security.handler.GlobalExceptionHandler
