@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.HlhtPlatformInfoMapper">
+
+    <resultMap type="com.hcp.operator.domain.HlhtPlatformInfo" id="HlhtPlatformInfoResult">
+        <result property="id"    column="id"    />
+        <result property="platformId"    column="platform_id"    />
+        <result property="platformName"    column="platform_name"    />
+        <result property="contactPerson"    column="contact_person"    />
+        <result property="mobile"    column="mobile"    />
+        <result property="platformSecretOrigin"    column="platform_secret_origin"    />
+        <result property="platformSecret"    column="platform_secret"    />
+        <result property="signSecret"    column="sign_secret"    />
+        <result property="dataSecret"    column="data_secret"    />
+        <result property="dataSecretIv"    column="data_secret_iv"    />
+        <result property="apiUrl"    column="api_url"    />
+        <result property="accessIp"    column="access_ip"    />
+        <result property="env"    column="env"    />
+        <result property="jingliPlatformId"    column="jingli_platform_id"    />
+        <result property="jingliPlatformSecret"    column="jingli_platform_secret"    />
+        <result property="jingliSigSecret"    column="jingli_sig_secret"    />
+        <result property="jingliDataSecret"    column="jingli_data_secret"    />
+        <result property="jingliDataSecretIv"    column="jingli_data_secret_iv"    />
+        <result property="pushEnable"    column="push_enable"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectHlhtPlatformInfoVo">
+        select id, platform_id, platform_name, contact_person, mobile, platform_secret_origin, platform_secret, sign_secret, data_secret, data_secret_iv, api_url, access_ip, env, jingli_platform_id, jingli_platform_secret, jingli_sig_secret, jingli_data_secret, jingli_data_secret_iv, push_enable, create_time from hlht_platform_info
+    </sql>
+
+    <select id="selectHlhtPlatformInfoList"   resultMap="HlhtPlatformInfoResult">
+        <include refid="selectHlhtPlatformInfoVo"/>
+        <where>
+            <if test="query.platformId != null  and query.platformId != ''"> and platform_id = #{query.platformId}</if>
+            <if test="query.platformName != null  and query.platformName != ''"> and platform_name like concat('%', #{query.platformName}, '%')</if>
+            <if test="query.contactPerson != null  and query.contactPerson != ''"> and contact_person = #{query.contactPerson}</if>
+            <if test="query.pushEnable != null  and query.pushEnable != ''"> and push_enable = #{query.pushEnable}</if>
+            <if test="query.startTime!=null and query.startTime!=''">
+                and date_format(create_time,'%Y-%m-%d') BETWEEN #{query.startTime} AND #{query.endTime}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteHlhtPlatformInfoByIds" parameterType="String">
+        delete from hlht_platform_info where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

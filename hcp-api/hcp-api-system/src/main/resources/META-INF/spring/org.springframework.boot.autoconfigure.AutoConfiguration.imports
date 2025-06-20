@@ -1,0 +1,6 @@
+com.hcp.system.api.factory.RemoteUserFallbackFactory
+com.hcp.system.api.factory.RemoteLogFallbackFactory
+com.hcp.system.api.factory.RemoteFileFallbackFactory
+com.hcp.system.api.factory.RemoteMemberFallbackFactory
+com.hcp.system.api.factory.RemoteMpFallbackFactory
+com.hcp.system.api.factory.RemoteSimulatorFallbackFactory

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.modules.monitor.mapper.MonitorCacheMapper">
+
+    <resultMap type="com.hcp.modules.monitor.domain.MonitorCache" id="MonitorCacheResult">
+        <result property="id"    column="id"    />
+        <result property="cacheName"    column="cache_name"    />
+        <result property="ip"    column="ip"    />
+        <result property="databaseNum"    column="database_num"    />
+        <result property="userPassword"    column="user_password"    />
+        <result property="ipPort"    column="ip_port"    />
+        <result property="rsaAddr"    column="rsa_addr"    />
+        <result property="isOnline"    column="is_online"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectMonitorCacheVo">
+        select id, cache_name, ip, database_num, user_password, ip_port, rsa_addr, is_online,user_phone,user_email,message_type, create_by, create_time, update_by, update_time, remark, tenant_id from monitor_cache
+    </sql>
+
+    <select id="selectMonitorCacheList"   resultMap="MonitorCacheResult">
+        <include refid="selectMonitorCacheVo"/>
+        <where>
+            <if test="query.cacheName != null  and query.cacheName != ''"> and cache_name like concat('%', #{query.cacheName}, '%')</if>
+            <if test="query.ip != null  and query.ip != ''"> and ip = #{query.ip}</if>
+        </where>
+    </select>
+
+    <delete id="deleteMonitorCacheByIds" parameterType="String">
+        delete from monitor_cache where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

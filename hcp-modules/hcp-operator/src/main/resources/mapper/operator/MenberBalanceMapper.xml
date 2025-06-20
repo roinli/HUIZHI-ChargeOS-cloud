@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.MenberBalanceMapper">
+
+    <resultMap type="com.hcp.system.api.domain.MenberBalance" id="MenberBalanceResult">
+        <result property="id"    column="id"    />
+        <result property="memberId"    column="member_id"    />
+        <result property="amount"    column="amount"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="version"    column="version"    />
+        <result property="mobile"    column="mobile"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectMenberBalanceVo">
+        select id, member_id, amount, create_time, update_time, version, mobile, tenant_id from c_menber_balance
+    </sql>
+
+    <select id="selectMenberBalanceList"   resultMap="MenberBalanceResult">
+        <include refid="selectMenberBalanceVo"/>
+        <where>
+            <if test="query.memberId != null "> and member_id = #{query.memberId}</if>
+            <if test="query.mobile != null  and query.mobile != ''"> and mobile = #{query.mobile}</if>
+        </where>
+    </select>
+    <select id="queryMonthTotalByUserId" resultType="com.hcp.system.api.domain.vo.MonthTotalRspVO"
+            parameterType="java.lang.Long">
+        SELECT
+            IFNULL( ROUND( sum( ordergold ), 2 ), 0 ) chargeAmount,
+            IFNULL( ROUND ( sum( real_hour ), 2 ), 0 ) chargeTime,
+            IFNULL( ROUND ( sum( consume_power ), 2 ), 0 ) chargeDegree
+        FROM
+            c_charging_order
+        WHERE
+            MONTH ( pay_time ) = MONTH (
+            CURDATE())
+          AND user_id = #{userId}
+    </select>
+
+    <delete id="deleteMenberBalanceByIds" parameterType="String">
+        delete from c_menber_balance where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

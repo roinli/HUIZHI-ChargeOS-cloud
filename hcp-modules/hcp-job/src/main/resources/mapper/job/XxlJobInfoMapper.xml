@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.job.mapper.XxlJobInfoMapper">
+
+    <resultMap type="com.hcp.job.domain.XxlJobInfo" id="XxlJobInfoResult">
+        <result property="id"    column="id"    />
+        <result property="jobGroup"    column="job_group"    />
+        <result property="jobDesc"    column="job_desc"    />
+        <result property="addTime"    column="add_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="author"    column="author"    />
+        <result property="alarmEmail"    column="alarm_email"    />
+        <result property="scheduleType"    column="schedule_type"    />
+        <result property="scheduleConf"    column="schedule_conf"    />
+        <result property="misfireStrategy"    column="misfire_strategy"    />
+        <result property="executorRouteStrategy"    column="executor_route_strategy"    />
+        <result property="executorHandler"    column="executor_handler"    />
+        <result property="executorParam"    column="executor_param"    />
+        <result property="executorBlockStrategy"    column="executor_block_strategy"    />
+        <result property="executorTimeout"    column="executor_timeout"    />
+        <result property="executorFailRetryCount"    column="executor_fail_retry_count"    />
+        <result property="glueType"    column="glue_type"    />
+        <result property="glueSource"    column="glue_source"    />
+        <result property="glueRemark"    column="glue_remark"    />
+        <result property="glueUpdatetime"    column="glue_updatetime"    />
+        <result property="childJobid"    column="child_jobid"    />
+        <result property="triggerStatus"    column="trigger_status"    />
+        <result property="triggerLastTime"    column="trigger_last_time"    />
+        <result property="triggerNextTime"    column="trigger_next_time"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectXxlJobInfoVo">
+        select id, job_group, job_desc, add_time, update_time, author, alarm_email, schedule_type, schedule_conf, misfire_strategy, executor_route_strategy, executor_handler, executor_param, executor_block_strategy, executor_timeout, executor_fail_retry_count, glue_type, glue_source, glue_remark, glue_updatetime, child_jobid, trigger_status, trigger_last_time, trigger_next_time, tenant_id from xxl_job_info
+    </sql>
+
+    <select id="getById" resultMap="XxlJobInfoResult">
+        <include refid="selectXxlJobInfoVo" /> where id = #{id}
+    </select>
+
+    <select id="selectXxlJobInfoList"   resultMap="XxlJobInfoResult">
+        <include refid="selectXxlJobInfoVo"/>
+        <where>
+            <if test="query.jobGroup != null "> and job_group = #{query.jobGroup}</if>
+            <if test="query.jobDesc != null  and query.jobDesc != ''"> and job_desc like concat('%', #{query.jobDesc}, '%')</if>
+            <if test="query.addTime != null "> and add_time = #{query.addTime}</if>
+            <if test="query.author != null  and query.author != ''"> and author like concat('%', #{query.author}, '%')</if>
+            <if test="query.alarmEmail != null  and query.alarmEmail != ''"> and alarm_email = #{query.alarmEmail}</if>
+            <if test="query.scheduleType != null  and query.scheduleType != ''"> and schedule_type = #{query.scheduleType}</if>
+            <if test="query.scheduleConf != null  and query.scheduleConf != ''"> and schedule_conf = #{query.scheduleConf}</if>
+            <if test="query.misfireStrategy != null  and query.misfireStrategy != ''"> and misfire_strategy = #{query.misfireStrategy}</if>
+            <if test="query.executorRouteStrategy != null  and query.executorRouteStrategy != ''"> and executor_route_strategy = #{query.executorRouteStrategy}</if>
+            <if test="query.executorHandler != null  and query.executorHandler != ''"> and executor_handler like concat('%', #{query.executorHandler}, '%')</if>
+            <if test="query.executorParam != null  and query.executorParam != ''"> and executor_param = #{query.executorParam}</if>
+            <if test="query.executorBlockStrategy != null  and query.executorBlockStrategy != ''"> and executor_block_strategy = #{query.executorBlockStrategy}</if>
+            <if test="query.executorTimeout != null "> and executor_timeout = #{query.executorTimeout}</if>
+            <if test="query.executorFailRetryCount != null "> and executor_fail_retry_count = #{query.executorFailRetryCount}</if>
+            <if test="query.glueType != null  and query.glueType != ''"> and glue_type = #{query.glueType}</if>
+            <if test="query.glueSource != null  and query.glueSource != ''"> and glue_source = #{query.glueSource}</if>
+            <if test="query.glueRemark != null  and query.glueRemark != ''"> and glue_remark = #{query.glueRemark}</if>
+            <if test="query.glueUpdatetime != null "> and glue_updatetime = #{query.glueUpdatetime}</if>
+            <if test="query.childJobid != null  and query.childJobid != ''"> and child_jobid = #{query.childJobid}</if>
+            <if test="query.triggerStatus != null "> and trigger_status = #{query.triggerStatus}</if>
+            <if test="query.tenantId != null "> and tenant_id = #{query.tenantId}</if>
+        </where>
+    </select>
+
+    <delete id="deleteXxlJobInfoByIds" parameterType="String">
+        delete from xxl_job_info where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="loadById" parameterType="java.util.HashMap" resultMap="XxlJobInfoResult">
+        <include refid="selectXxlJobInfoVo" /> AS t
+        WHERE t.id = #{id}
+    </select>
+
+    <update id="updateTriggerInfo" >
+        UPDATE xxl_job_log
+        SET
+            `trigger_time`= #{triggerTime},
+            `trigger_code`= #{triggerCode},
+            `trigger_msg`= #{triggerMsg},
+            `executor_address`= #{executorAddress},
+            `executor_handler`=#{executorHandler},
+            `executor_param`= #{executorParam},
+            `executor_sharding_param`= #{executorShardingParam},
+            `executor_fail_retry_count`= #{executorFailRetryCount}
+        WHERE `id`= #{id}
+    </update>
+
+    <update id="updateOne" parameterType="com.hcp.job.domain.XxlJobInfo">
+        UPDATE xxl_job_info
+        SET
+            job_group = #{jobGroup},
+            job_desc = #{jobDesc},
+            update_time = #{updateTime},
+            author = #{author},
+            alarm_email = #{alarmEmail},
+            schedule_type = #{scheduleType},
+            schedule_conf = #{scheduleConf},
+            misfire_strategy = #{misfireStrategy},
+            executor_route_strategy = #{executorRouteStrategy},
+            executor_handler = #{executorHandler},
+            executor_param = #{executorParam},
+            executor_block_strategy = #{executorBlockStrategy},
+            executor_timeout = ${executorTimeout},
+            executor_fail_retry_count = ${executorFailRetryCount},
+            glue_type = #{glueType},
+            glue_source = #{glueSource},
+            glue_remark = #{glueRemark},
+            glue_updatetime = #{glueUpdatetime},
+            child_jobid = #{childJobId},
+            trigger_status = #{triggerStatus},
+            trigger_last_time = #{triggerLastTime},
+            trigger_next_time = #{triggerNextTime}
+        WHERE id = #{id}
+    </update>
+
+    <select id="scheduleJobQuery" parameterType="java.util.HashMap" resultMap="XxlJobInfoResult">
+        <include refid="selectXxlJobInfoVo" /> AS t
+        WHERE t.trigger_status = 1
+        and t.trigger_next_time <![CDATA[ <= ]]> #{maxNextTime}
+        ORDER BY id ASC
+        LIMIT #{pagesize}
+    </select>
+
+    <update id="scheduleUpdate" parameterType="com.hcp.job.domain.XxlJobInfo"  >
+        UPDATE xxl_job_info
+        SET
+            trigger_last_time = #{triggerLastTime},
+            trigger_next_time = #{triggerNextTime},
+            trigger_status = #{triggerStatus}
+        WHERE id = #{id}
+    </update>
+
+    <insert id="save" parameterType="com.hcp.job.domain.XxlJobInfo" useGeneratedKeys="true" keyProperty="id" >
+        INSERT INTO xxl_job_info (
+        job_group,
+        job_desc,
+        add_time,
+        update_time,
+        author,
+        alarm_email,
+        schedule_type,
+        schedule_conf,
+        misfire_strategy,
+        executor_route_strategy,
+        executor_handler,
+        executor_param,
+        executor_block_strategy,
+        executor_timeout,
+        executor_fail_retry_count,
+        glue_type,
+        glue_source,
+        glue_remark,
+        glue_updatetime,
+        child_jobid,
+        trigger_status,
+        trigger_last_time,
+        trigger_next_time
+        ) VALUES (
+        #{jobGroup},
+        #{jobDesc},
+        #{addTime},
+        #{updateTime},
+        #{author},
+        #{alarmEmail},
+        #{scheduleType},
+        #{scheduleConf},
+        #{misfireStrategy},
+        #{executorRouteStrategy},
+        #{executorHandler},
+        #{executorParam},
+        #{executorBlockStrategy},
+        #{executorTimeout},
+        #{executorFailRetryCount},
+        #{glueType},
+        #{glueSource},
+        #{glueRemark},
+        #{glueUpdatetime},
+        #{childJobId},
+        #{triggerStatus},
+        #{triggerLastTime},
+        #{triggerNextTime}
+        );
+    </insert>
+
+</mapper>

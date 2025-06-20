@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.ChargingPileMapper">
+
+    <resultMap type="com.hcp.system.api.domain.ChargingPile" id="ChargingPileResult">
+        <result property="pileId"    column="pile_id"    />
+        <result property="name"    column="name"    />
+        <result property="cpFeeType"    column="cp_fee_type"    />
+        <result property="simCard"    column="sim_card"    />
+        <result property="simDueTime"    column="sim_due_time"    />
+        <result property="equipTemperature"    column="equip_temperature"    />
+        <result property="equipCpuTemperature"    column="equip_cpu_temperature"    />
+        <result property="lat"    column="lat"    />
+        <result property="lng"    column="lng"    />
+        <result property="address"    column="address"    />
+        <result property="imgUrl"    column="img_url"    />
+        <result property="runningStatus"    column="running_status"    />
+        <result property="offlineTime"    column="offline_time"    />
+        <result property="userId"    column="user_id"    />
+        <result property="lastUseTime"    column="last_use_time"    />
+        <result property="stationId"    column="station_id"    />
+        <result property="wxRuleId"    column="wx_rule_id"    />
+        <result property="cardRuleId"    column="card_rule_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="deviceType"    column="device_type"    />
+        <result property="pileType"    column="pile_type"    />
+        <result property="pileStatus"    column="pile_status"    />
+        <result property="electricity"    column="electricity"    />
+        <result property="voltage"    column="voltage"    />
+        <result property="maxPower"    column="max_power"    />
+        <result property="feeNeedUpdate"    column="fee_need_update"    />
+        <result property="apiVersion"    column="api_version"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="deleted"    column="deleted"    />
+        <result property="isHlht"    column="is_hlht"    />
+        <result property="hlhtId"    column="hlht_id"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectChargingPileVo">
+        select pile_id, name, cp_fee_type, sim_card, sim_due_time, equip_temperature, equip_cpu_temperature, lat, lng, address, img_url, running_status, offline_time, user_id, last_use_time, station_id, wx_rule_id, card_rule_id, create_time, device_type, pile_type, pile_status, electricity, voltage, max_power, fee_need_update, api_version, update_time, remark, deleted, is_hlht, hlht_id, tenant_id from c_charging_pile
+    </sql>
+
+    <select id="selectChargingPileList"   resultMap="ChargingPileResult">
+        <include refid="selectChargingPileVo"/>
+        <where>
+            <if test="query.pileId != null  and query.pileId != ''"> and pile_id = #{query.pileId}</if>
+            <if test="query.name != null  and query.name != ''"> and name like concat('%', #{query.name}, '%')</if>
+            <if test="query.cpFeeType != null  and query.cpFeeType != ''"> and cp_fee_type = #{query.cpFeeType}</if>
+            <if test="query.userId != null "> and user_id = #{query.userId}</if>
+            <if test="query.deviceType != null "> and device_type = #{query.deviceType}</if>
+            <if test="query.pileType != null "> and pile_type = #{query.pileType}</if>
+            <if test="query.pileStatus != null "> and pile_status = #{query.pileStatus}</if>
+            <if test="query.feeNeedUpdate != null "> and fee_need_update = #{query.feeNeedUpdate}</if>
+        </where>
+    </select>
+
+    <delete id="deleteChargingPileByPileIds" parameterType="String">
+        delete from c_charging_pile where pile_id in
+        <foreach item="pileId" collection="array" open="(" separator="," close=")">
+            #{pileId}
+        </foreach>
+    </delete>
+
+    <select id="getChargeTotal" resultType="com.hcp.operator.domain.PileTotalResult">
+
+        SELECT
+        a.pile_id chargeNo,
+        a.station_id plotId,
+        plots.station_name plotName,
+        a.name chargeName,
+        a.user_id userId,
+        a.running_status runningStatus,
+        IFNULL(SUM(IF(b.order_state IN(3,4,5,6,7 ),b.consume_power,0)),0) totalPowerConsumption,
+        IFNULL(SUM(IF(b.order_state IN(3,4,5,6,7 ),TIMESTAMPDIFF( MINUTE, b.create_time, b.real_end_time ),0)),0)
+        chargeTotalHour,
+        IFNULL(SUM(IF(b.order_state IN(3,7 ),b.service_fee,0)),0) serviceFee,
+        IFNULL(SUM(IF(b.order_state IN(3,7 ),b.charge_fee,0)),0) chargeFee,
+        IFNULL(SUM(IF(b.order_state IN(3,7 ),b.ordergold,0)),0) totalAmount,
+        COUNT(b.order_state!=2) chargeTotalTimes
+
+        FROM
+        `c_charging_pile` a
+        LEFT JOIN c_charging_station plots ON a.station_id = plots.station_id
+        LEFT JOIN c_charging_order b on b.pile_id = a.pile_id
+
+        WHERE 1=1
+        <if test="pileVo.userId!=null and pileVo.userId!=''">
+            and a.user_id = #{pileVo.userId}
+        </if>
+        <if test="pileVo.chargeNo!=null and pileVo.chargeNo!=''">
+            and a.pile_id like CONCAT('%',#{pileVo.chargeNo},'%')
+        </if>
+
+        <if test="pileVo.plotName!=null and pileVo.plotName!=''">
+            and plots.station_name like CONCAT('%',#{pileVo.plotName},'%')
+        </if>
+
+        <if test="pileVo.runningStatus!=null and pileVo.runningStatus!=''">
+            and ( a.running_status = #{pileVo.runningStatus} )
+        </if>
+        <if test="pileVo.startTime!=null and pileVo.startTime!=''">
+            and date_format(a.create_time,'%Y-%m-%d') BETWEEN #{pileVo.startTime} AND #{pileVo.endTime}
+        </if>
+
+        GROUP BY a.pile_id
+
+
+    </select>
+    <select id="getById" resultType="com.hcp.system.api.domain.ChargingPile">
+        <include refid="selectChargingPileVo"/> where pile_id = #{pileId}
+    </select>
+    <select id="queryPlotInfoByVo" resultType="com.hcp.system.api.domain.vo.PlotVO"
+            parameterType="com.hcp.system.api.domain.vo.PlotInfoReqVO">
+            select * from (
+            select
+            cp.id,
+            cp.plot_name plotName,
+            c1.`Name` province,
+            c2.`Name` city,
+            c3.`Name` regionName,
+            cp.lat ,
+            cp.lng ,
+            cp.address ,
+            cp.park_car_info parkCarInfo,
+            cp.receipt_status receiptStatus,
+            cp.supporting_facilities supportingFacilities,
+            cp.park_car_status parkCarStatus,
+            cp.device_type deviceType
+
+            from
+            c_plot cp
+            left join c_city c3 on cp.region_code=c3.Id
+            left join c_city c2 on c3.Pid=c2.Id
+            left join c_city c1 on c2.Pid=c1.Id
+            where 1=1
+
+            <if test="deviceType != null and deviceType != ''">
+                and cp.device_type = #{deviceType}
+            </if>
+            <if test="city != null and city != ''">
+                and c3.Name   like concat('%',#{city},'%')
+            </if>
+
+            <if test="plotName != null and plotName != ''">
+                and cp.plot_name   like concat('%',#{plotName},'%')
+            </if>
+            <if test="address != null and address != ''">
+                and cp.address   like concat('%',#{address},'%')
+            </if>
+            <if test="supportingFacilities != null and supportingFacilities.size != 0">
+                and cp.supporting_facilities  in
+                <foreach  item="item" index="index" collection="supportingFacilities" open="(" separator="," close=" )">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="supportingFacilities != null and parkCarStatus.size != 0">
+                and cp.park_car_status  in
+                <foreach  item="item" index="index" collection="parkCarStatus" open="(" separator="," close=" )">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="supportingFacilities != null and receiptStatus.size != 0">
+                and cp.receipt_status  in
+                <foreach  item="item" index="index" collection="receiptStatus" open="(" separator="," close=" )">
+                    #{item}
+                </foreach>
+            </if>
+
+            and        (acos(sin((#{lat} * 3.1415)/180)*sin((lat * 3.1415)/ 180)
+            + cos((#{lat} * 3.1415)/180)*cos((lat * 3.1415)/ 180)*cos((#{lng} * 3.1415)/180
+            - (lng * 3.1415)/ 180))* 6371393) <![CDATA[<]]> #{distance} ) t
+
+
+    </select>
+    <select id="queryPlotInfoByPage" resultType="com.hcp.system.api.domain.vo.PlotVO"
+            parameterType="com.hcp.system.api.domain.vo.PlotInfoReqVO">
+            select * from (
+            select
+            cp.station_id stationId,
+            cp.station_name stationName,
+            c1.`Name` province,
+            c2.`Name` city,
+            c3.`Name` regionName,
+            cp.lat ,
+            cp.lng ,
+            cp.address ,
+            cp.park_car_info parkCarInfo,
+            cp.receipt_status receiptStatus,
+            cp.supporting_facilities supportingFacilities,
+            cp.park_car_status parkCarStatus,
+            cp.device_type deviceType
+
+            from
+            c_charging_station cp
+            left join c_city c3 on cp.region_code=c3.Id
+            left join c_city c2 on c3.Pid=c2.Id
+            left join c_city c1 on c2.Pid=c1.Id
+            where 1=1
+
+            <if test="plotInfoReqVO.deviceType != null and plotInfoReqVO.deviceType != ''">
+                and cp.device_type = #{plotInfoReqVO.deviceType}
+            </if>
+            <if test="plotInfoReqVO.city != null and plotInfoReqVO.city != ''">
+                and c3.Name   like concat('%',#{plotInfoReqVO.city},'%')
+            </if>
+
+            <if test="plotInfoReqVO.plotName != null and plotInfoReqVO.plotName != ''">
+                and cp.station_name   like concat('%',#{plotInfoReqVO.plotName},'%')
+            </if>
+            <if test="plotInfoReqVO.address != null and plotInfoReqVO.address != ''">
+                and cp.address   like concat('%',#{plotInfoReqVO.address},'%')
+            </if>
+            <if test="plotInfoReqVO.supportingFacilities != null and plotInfoReqVO.supportingFacilities.size != 0">
+                and cp.supporting_facilities  in
+                <foreach  item="item" index="index" collection="plotInfoReqVO.supportingFacilities" open="(" separator="," close=" )">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="plotInfoReqVO.supportingFacilities != null and plotInfoReqVO.parkCarStatus.size != 0">
+                and cp.park_car_status  in
+                <foreach  item="item" index="index" collection="plotInfoReqVO.parkCarStatus" open="(" separator="," close=" )">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="plotInfoReqVO.supportingFacilities != null and plotInfoReqVO.receiptStatus.size != 0">
+                and cp.receipt_status  in
+                <foreach  item="item" index="index" collection="plotInfoReqVO.receiptStatus" open="(" separator="," close=" )">
+                    #{item}
+                </foreach>
+            </if>
+
+            and        (acos(sin((#{plotInfoReqVO.lat} * 3.1415)/180)*sin((lat * 3.1415)/ 180)
+            + cos((#{plotInfoReqVO.lat} * 3.1415)/180)*cos((lat * 3.1415)/ 180)*cos((#{plotInfoReqVO.lng} * 3.1415)/180
+            - (lng * 3.1415)/ 180))* 6371393) <![CDATA[<]]> #{plotInfoReqVO.distance} ) t
+
+
+    </select>
+    <select id="queryChargingPileData" resultType="com.hcp.system.api.domain.vo.ChargingPileVO"
+            parameterType="java.lang.String">
+        SELECT
+            a.pile_id ,
+            a.name,
+            c1.`Name` province,
+            c2.`Name` city,
+            c3.`Name` regionName,
+            c3.Id regionCode,
+            a.device_type deviceType,
+            b.address PKADDRESS,
+            b.station_name stationName,
+            a.pile_type pileType,
+            a.hlht_id hlhtId,
+            a.is_hlht isHlht
+        FROM
+            `c_charging_pile` a
+                left JOIN c_charging_station b on a.station_id=b.station_id
+                left join c_city c3 on b.region_code=c3.Id
+                left join c_city c2 on c3.Pid=c2.Id
+                left join c_city c1 on c2.Pid=c1.Id
+        WHERE
+            a.pile_id = #{pileId}
+    </select>
+    <select id="queryPlotDetailById" resultType="com.hcp.system.api.domain.vo.PlotDetailVo"
+            parameterType="java.lang.String">
+        select
+            cp.station_id stationId,
+            cp.station_name stationName,
+            cp.lat ,
+            cp.lng ,
+            c1.`Name` province,
+            c2.`Name` city,
+            c3.`Name` regionName,
+            cp.address,
+            (select file_url  from c_file cf where cf.id= cp.file_id) url,
+            (select max(max_power) from c_charging_pile ccp3 where ccp3.station_id = cp.station_id and ccp3.pile_status = 1) maxPower,
+            cp.park_car_info parkCarInfo,
+            cp.is_hlht isHlht,
+            cp.hlht_id hlhtId
+        from
+            c_charging_station cp
+                left join c_city c3 on cp.region_code=c3.Id
+                left join c_city c2 on c3.Pid=c2.Id
+                left join c_city c1 on c2.Pid=c1.Id
+        where
+            cp.station_id=#{plotId}
+    </select>
+    <select id="queryPileListById" resultType="com.hcp.system.api.domain.vo.PlotPileVo">
+        SELECT
+            ccp.pile_id pileNo,
+            ccp.electricity,
+            ccp.voltage,
+            ccp.max_power maxPower,
+            ccp.pile_type pileType,
+            ( SELECT min( price ) FROM c_custom_price ccp2 WHERE ccp2.rule_id = ccp.wx_rule_id AND ccp2.del_flag = 0 ) price,
+            ( SELECT min( service_price ) FROM c_custom_price ccp2 WHERE ccp2.rule_id = ccp.wx_rule_id AND ccp2.del_flag = 0 ) servicePrice,
+            ( SELECT min( hours ) FROM c_custom_price ccp2 WHERE ccp2.rule_id = ccp.wx_rule_id AND ccp2.del_flag = 0 ) hours,
+            (
+                SELECT
+                    count( 1 )
+                FROM
+                    c_charging_port ccp3
+                WHERE
+                    ccp3.pile_id = ccp.pile_id
+                  AND ccp3.STATE IN ( "Y", "N" )) totalNum,
+            ( SELECT count( 1 ) FROM c_charging_port ccp3 WHERE ccp3.pile_id = ccp.pile_id AND ccp3.STATE = "N" ) notBusyNum,
+            ccp.is_hlht isHlht,
+            ccp.hlht_id hlhtId
+        FROM
+            c_charging_pile ccp
+        WHERE
+            ccp.pile_status = 1
+          and ccp.device_type = #{map.deviceType}
+          and ccp.station_id = #{map.plotId}
+    </select>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ChargingPileResult">
+        <include refid="selectChargingPileVo" />
+        where  pile_id = #{pileId,jdbcType=VARCHAR}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from c_charging_pile
+        where  pile_id = #{pileId,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insertPile" keyColumn="pile_id" keyProperty="pileId" parameterType="com.hcp.system.api.domain.ChargingPile" useGeneratedKeys="true">
+        insert into c_charging_pile
+        ( pile_id,name,cp_fee_type
+        ,sim_card,sim_due_time,equip_temperature
+        ,equip_cpu_temperature,lat,lng
+        ,address,img_url,running_status
+        ,offline_time,user_id,last_use_time
+        ,station_id,wx_rule_id,card_rule_id
+        ,create_time,device_type,pile_type
+        ,pile_status,electricity,voltage
+        ,max_power,fee_need_update,api_version
+        ,update_time,remark,deleted
+        ,is_hlht,hlht_id,tenant_id
+        ,create_by,update_by)
+        values (#{pileId,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{cpFeeType,jdbcType=VARCHAR}
+               ,#{simCard,jdbcType=VARCHAR},#{simDueTime,jdbcType=VARCHAR},#{equipTemperature,jdbcType=DECIMAL}
+               ,#{equipCpuTemperature,jdbcType=DECIMAL},#{lat,jdbcType=VARCHAR},#{lng,jdbcType=VARCHAR}
+               ,#{address,jdbcType=VARCHAR},#{imgUrl,jdbcType=VARCHAR},#{runningStatus,jdbcType=INTEGER}
+               ,#{offlineTime,jdbcType=TIMESTAMP},#{userId,jdbcType=BIGINT},#{lastUseTime,jdbcType=TIMESTAMP}
+               ,#{stationId,jdbcType=BIGINT},#{wxRuleId,jdbcType=INTEGER},#{cardRuleId,jdbcType=INTEGER}
+               ,#{createTime,jdbcType=TIMESTAMP},#{deviceType,jdbcType=INTEGER},#{pileType,jdbcType=INTEGER}
+               ,#{pileStatus,jdbcType=TINYINT},#{electricity,jdbcType=VARCHAR},#{voltage,jdbcType=VARCHAR}
+               ,#{maxPower,jdbcType=INTEGER},#{feeNeedUpdate,jdbcType=TINYINT},#{apiVersion,jdbcType=INTEGER}
+               ,#{updateTime,jdbcType=TIMESTAMP},#{remark,jdbcType=VARCHAR},#{deleted,jdbcType=TINYINT}
+               ,#{isHlht,jdbcType=INTEGER},#{hlhtId,jdbcType=VARCHAR},#{tenantId,jdbcType=BIGINT}
+               ,#{createBy,jdbcType=VARCHAR},#{updateBy,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="pile_id" keyProperty="pileId" parameterType="com.hcp.system.api.domain.ChargingPile" useGeneratedKeys="true">
+        insert into c_charging_pile
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pileId != null">pile_id,</if>
+            <if test="name != null">name,</if>
+            <if test="cpFeeType != null">cp_fee_type,</if>
+            <if test="simCard != null">sim_card,</if>
+            <if test="simDueTime != null">sim_due_time,</if>
+            <if test="equipTemperature != null">equip_temperature,</if>
+            <if test="equipCpuTemperature != null">equip_cpu_temperature,</if>
+            <if test="lat != null">lat,</if>
+            <if test="lng != null">lng,</if>
+            <if test="address != null">address,</if>
+            <if test="imgUrl != null">img_url,</if>
+            <if test="runningStatus != null">running_status,</if>
+            <if test="offlineTime != null">offline_time,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="lastUseTime != null">last_use_time,</if>
+            <if test="stationId != null">station_id,</if>
+            <if test="wxRuleId != null">wx_rule_id,</if>
+            <if test="cardRuleId != null">card_rule_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="deviceType != null">device_type,</if>
+            <if test="pileType != null">pile_type,</if>
+            <if test="pileStatus != null">pile_status,</if>
+            <if test="electricity != null">electricity,</if>
+            <if test="voltage != null">voltage,</if>
+            <if test="maxPower != null">max_power,</if>
+            <if test="feeNeedUpdate != null">fee_need_update,</if>
+            <if test="apiVersion != null">api_version,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="deleted != null">deleted,</if>
+            <if test="isHlht != null">is_hlht,</if>
+            <if test="hlhtId != null">hlht_id,</if>
+            <if test="tenantId != null">tenant_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="pileId != null">#{pileId,jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name,jdbcType=VARCHAR},</if>
+            <if test="cpFeeType != null">#{cpFeeType,jdbcType=VARCHAR},</if>
+            <if test="simCard != null">#{simCard,jdbcType=VARCHAR},</if>
+            <if test="simDueTime != null">#{simDueTime,jdbcType=VARCHAR},</if>
+            <if test="equipTemperature != null">#{equipTemperature,jdbcType=DECIMAL},</if>
+            <if test="equipCpuTemperature != null">#{equipCpuTemperature,jdbcType=DECIMAL},</if>
+            <if test="lat != null">#{lat,jdbcType=VARCHAR},</if>
+            <if test="lng != null">#{lng,jdbcType=VARCHAR},</if>
+            <if test="address != null">#{address,jdbcType=VARCHAR},</if>
+            <if test="imgUrl != null">#{imgUrl,jdbcType=VARCHAR},</if>
+            <if test="runningStatus != null">#{runningStatus,jdbcType=INTEGER},</if>
+            <if test="offlineTime != null">#{offlineTime,jdbcType=TIMESTAMP},</if>
+            <if test="userId != null">#{userId,jdbcType=BIGINT},</if>
+            <if test="lastUseTime != null">#{lastUseTime,jdbcType=TIMESTAMP},</if>
+            <if test="stationId != null">#{stationId,jdbcType=BIGINT},</if>
+            <if test="wxRuleId != null">#{wxRuleId,jdbcType=INTEGER},</if>
+            <if test="cardRuleId != null">#{cardRuleId,jdbcType=INTEGER},</if>
+            <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="deviceType != null">#{deviceType,jdbcType=INTEGER},</if>
+            <if test="pileType != null">#{pileType,jdbcType=INTEGER},</if>
+            <if test="pileStatus != null">#{pileStatus,jdbcType=TINYINT},</if>
+            <if test="electricity != null">#{electricity,jdbcType=VARCHAR},</if>
+            <if test="voltage != null">#{voltage,jdbcType=VARCHAR},</if>
+            <if test="maxPower != null">#{maxPower,jdbcType=INTEGER},</if>
+            <if test="feeNeedUpdate != null">#{feeNeedUpdate,jdbcType=TINYINT},</if>
+            <if test="apiVersion != null">#{apiVersion,jdbcType=INTEGER},</if>
+            <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
+            <if test="remark != null">#{remark,jdbcType=VARCHAR},</if>
+            <if test="deleted != null">#{deleted,jdbcType=TINYINT},</if>
+            <if test="isHlht != null">#{isHlht,jdbcType=INTEGER},</if>
+            <if test="hlhtId != null">#{hlhtId,jdbcType=VARCHAR},</if>
+            <if test="tenantId != null">#{tenantId,jdbcType=BIGINT},</if>
+            <if test="createBy != null">#{createBy,jdbcType=VARCHAR},</if>
+            <if test="updateBy != null">#{updateBy,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hcp.system.api.domain.ChargingPile">
+        update c_charging_pile
+        <set>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="cpFeeType != null">
+                cp_fee_type = #{cpFeeType,jdbcType=VARCHAR},
+            </if>
+            <if test="simCard != null">
+                sim_card = #{simCard,jdbcType=VARCHAR},
+            </if>
+            <if test="simDueTime != null">
+                sim_due_time = #{simDueTime,jdbcType=VARCHAR},
+            </if>
+            <if test="equipTemperature != null">
+                equip_temperature = #{equipTemperature,jdbcType=DECIMAL},
+            </if>
+            <if test="equipCpuTemperature != null">
+                equip_cpu_temperature = #{equipCpuTemperature,jdbcType=DECIMAL},
+            </if>
+            <if test="lat != null">
+                lat = #{lat,jdbcType=VARCHAR},
+            </if>
+            <if test="lng != null">
+                lng = #{lng,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null">
+                address = #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="imgUrl != null">
+                img_url = #{imgUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="runningStatus != null">
+                running_status = #{runningStatus,jdbcType=INTEGER},
+            </if>
+            <if test="offlineTime != null">
+                offline_time = #{offlineTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="lastUseTime != null">
+                last_use_time = #{lastUseTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="stationId != null">
+                station_id = #{stationId,jdbcType=BIGINT},
+            </if>
+            <if test="wxRuleId != null">
+                wx_rule_id = #{wxRuleId,jdbcType=INTEGER},
+            </if>
+            <if test="cardRuleId != null">
+                card_rule_id = #{cardRuleId,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deviceType != null">
+                device_type = #{deviceType,jdbcType=INTEGER},
+            </if>
+            <if test="pileType != null">
+                pile_type = #{pileType,jdbcType=INTEGER},
+            </if>
+            <if test="pileStatus != null">
+                pile_status = #{pileStatus,jdbcType=TINYINT},
+            </if>
+            <if test="electricity != null">
+                electricity = #{electricity,jdbcType=VARCHAR},
+            </if>
+            <if test="voltage != null">
+                voltage = #{voltage,jdbcType=VARCHAR},
+            </if>
+            <if test="maxPower != null">
+                max_power = #{maxPower,jdbcType=INTEGER},
+            </if>
+            <if test="feeNeedUpdate != null">
+                fee_need_update = #{feeNeedUpdate,jdbcType=TINYINT},
+            </if>
+            <if test="apiVersion != null">
+                api_version = #{apiVersion,jdbcType=INTEGER},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="remark != null">
+                remark = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="deleted != null">
+                deleted = #{deleted,jdbcType=TINYINT},
+            </if>
+            <if test="isHlht != null">
+                is_hlht = #{isHlht,jdbcType=INTEGER},
+            </if>
+            <if test="hlhtId != null">
+                hlht_id = #{hlhtId,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where   pile_id = #{pileId,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hcp.system.api.domain.ChargingPile">
+        update c_charging_pile
+        set
+            name =  #{name,jdbcType=VARCHAR},
+            cp_fee_type =  #{cpFeeType,jdbcType=VARCHAR},
+            sim_card =  #{simCard,jdbcType=VARCHAR},
+            sim_due_time =  #{simDueTime,jdbcType=VARCHAR},
+            equip_temperature =  #{equipTemperature,jdbcType=DECIMAL},
+            equip_cpu_temperature =  #{equipCpuTemperature,jdbcType=DECIMAL},
+            lat =  #{lat,jdbcType=VARCHAR},
+            lng =  #{lng,jdbcType=VARCHAR},
+            address =  #{address,jdbcType=VARCHAR},
+            img_url =  #{imgUrl,jdbcType=VARCHAR},
+            running_status =  #{runningStatus,jdbcType=INTEGER},
+            offline_time =  #{offlineTime,jdbcType=TIMESTAMP},
+            user_id =  #{userId,jdbcType=BIGINT},
+            last_use_time =  #{lastUseTime,jdbcType=TIMESTAMP},
+            station_id =  #{stationId,jdbcType=BIGINT},
+            wx_rule_id =  #{wxRuleId,jdbcType=INTEGER},
+            card_rule_id =  #{cardRuleId,jdbcType=INTEGER},
+            create_time =  #{createTime,jdbcType=TIMESTAMP},
+            device_type =  #{deviceType,jdbcType=INTEGER},
+            pile_type =  #{pileType,jdbcType=INTEGER},
+            pile_status =  #{pileStatus,jdbcType=TINYINT},
+            electricity =  #{electricity,jdbcType=VARCHAR},
+            voltage =  #{voltage,jdbcType=VARCHAR},
+            max_power =  #{maxPower,jdbcType=INTEGER},
+            fee_need_update =  #{feeNeedUpdate,jdbcType=TINYINT},
+            api_version =  #{apiVersion,jdbcType=INTEGER},
+            update_time =  #{updateTime,jdbcType=TIMESTAMP},
+            remark =  #{remark,jdbcType=VARCHAR},
+            deleted =  #{deleted,jdbcType=TINYINT},
+            is_hlht =  #{isHlht,jdbcType=INTEGER},
+            hlht_id =  #{hlhtId,jdbcType=VARCHAR},
+            tenant_id =  #{tenantId,jdbcType=BIGINT},
+            create_by =  #{createBy,jdbcType=VARCHAR},
+            update_by =  #{updateBy,jdbcType=VARCHAR}
+        where   pile_id = #{pileId,jdbcType=VARCHAR}
+    </update>
+
+</mapper>

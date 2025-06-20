@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.CityMapper">
+
+    <resultMap type="com.hcp.operator.domain.City" id="CityResult">
+        <result property="Id"    column="Id"    />
+        <result property="Name"    column="Name"    />
+        <result property="Pid"    column="Pid"    />
+    </resultMap>
+
+    <sql id="selectCityVo">
+        select Id, Name, Pid from c_city
+    </sql>
+
+    <select id="selectCityList"   resultMap="CityResult">
+        <include refid="selectCityVo"/>
+        <where>
+            <if test="query.Id != null "> and Id = #{query.Id}</if>
+            <if test="query.Name != null  and query.Name != ''"> and Name like concat('%', #{query.Name}, '%')</if>
+            <if test="query.Pid != null "> and Pid = #{query.Pid}</if>
+        </where>
+    </select>
+
+    <delete id="deleteCityByIds" parameterType="String">
+        delete from c_city where Id in
+        <foreach item="Id" collection="array" open="(" separator="," close=")">
+            #{Id}
+        </foreach>
+    </delete>
+</mapper>

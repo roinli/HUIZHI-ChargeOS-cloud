@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.HlhtEquipmentInfoMapper">
+
+    <resultMap type="com.hcp.operator.domain.HlhtEquipmentInfo" id="HlhtEquipmentInfoResult">
+        <result property="equipmentId"    column="equipment_id"    />
+        <result property="svin"    column="svin"    />
+        <result property="sautoPower"    column="sauto_power"    />
+        <result property="equipmentClassification"    column="equipment_classification"    />
+        <result property="equipmentUniqueNumber"    column="equipment_unique_number"    />
+        <result property="equipmentType"    column="equipment_type"    />
+        <result property="power"    column="power"    />
+        <result property="manufacturerId"    column="manufacturer_id"    />
+        <result property="manufacturerName"    column="manufacturer_name"    />
+        <result property="equipmentModel"    column="equipment_model"    />
+        <result property="productionDate"    column="production_date"    />
+        <result property="equipmentLng"    column="equipment_lng"    />
+        <result property="equipmentLat"    column="equipment_lat"    />
+        <result property="equipmentName"    column="equipment_name"    />
+        <result property="voltageUpperLimits"    column="voltage_upper_limits"    />
+        <result property="voltageLowerLimits"    column="voltage_lower_limits"    />
+        <result property="current"    column="current"    />
+        <result property="stationId"    column="station_id"    />
+    </resultMap>
+
+    <sql id="selectHlhtEquipmentInfoVo">
+        select equipment_id, svin, sauto_power, equipment_classification, equipment_unique_number, equipment_type, power, manufacturer_id,
+               manufacturer_name, equipment_model, production_date, equipment_lng, equipment_lat, equipment_name, voltage_upper_limits, voltage_lower_limits, current, station_id from hlht_equipment_info
+    </sql>
+
+    <select id="selectHlhtEquipmentInfoList"   resultMap="HlhtEquipmentInfoResult">
+        <include refid="selectHlhtEquipmentInfoVo"/>
+        <where>
+            <if test="query.svin != null "> and svin = #{query.svin}</if>
+            <if test="query.sautoPower != null "> and sauto_power = #{query.sautoPower}</if>
+            <if test="query.equipmentClassification != null "> and equipment_classification = #{query.equipmentClassification}</if>
+            <if test="query.equipmentUniqueNumber != null  and query.equipmentUniqueNumber != ''"> and equipment_unique_number = #{query.equipmentUniqueNumber}</if>
+            <if test="query.equipmentType != null "> and equipment_type = #{query.equipmentType}</if>
+            <if test="query.power != null "> and power = #{query.power}</if>
+            <if test="query.manufacturerID != null  and query.manufacturerID != ''"> and manufacturer_id = #{query.manufacturerID}</if>
+            <if test="query.manufacturerName != null  and query.manufacturerName != ''"> and manufacturer_name like concat('%', #{query.manufacturerName}, '%')</if>
+            <if test="query.equipmentModel != null  and query.equipmentModel != ''"> and equipment_model = #{query.equipmentModel}</if>
+            <if test="query.productionDate != null  and query.productionDate != ''"> and production_date = #{query.productionDate}</if>
+            <if test="query.equipmentLng != null "> and equipment_lng = #{query.equipmentLng}</if>
+            <if test="query.equipmentLat != null "> and equipment_lat = #{query.equipmentLat}</if>
+            <if test="query.equipmentName != null  and query.equipmentName != ''"> and equipment_name like concat('%', #{query.equipmentName}, '%')</if>
+            <if test="query.voltageUpperLimits != null "> and voltage_upper_limits = #{query.voltageUpperLimits}</if>
+            <if test="query.voltageLowerLimits != null "> and voltage_lower_limits = #{query.voltageLowerLimits}</if>
+            <if test="query.current != null "> and current = #{query.current}</if>
+            <if test="query.stationId != null  and query.stationId != ''"> and station_id = #{query.stationId}</if>
+        </where>
+    </select>
+
+    <delete id="deleteHlhtEquipmentInfoByEquipmentIDs" parameterType="String">
+        delete from hlht_equipment_info where equipmentID in
+        <foreach item="equipmentID" collection="array" open="(" separator="," close=")">
+            #{equipmentID}
+        </foreach>
+    </delete>
+</mapper>

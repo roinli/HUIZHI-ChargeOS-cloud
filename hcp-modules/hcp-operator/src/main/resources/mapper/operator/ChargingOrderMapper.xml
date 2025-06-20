@@ -1,0 +1,510 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.ChargingOrderMapper">
+
+    <resultMap type="com.hcp.system.api.domain.ChargingOrder" id="ChargingOrderResult">
+        <result property="orderId"    column="order_id"    />
+        <result property="userId"    column="user_Id"    />
+        <result property="orderState"    column="order_state"    />
+        <result property="pileId"    column="pile_id"    />
+        <result property="portId"    column="port_id"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="orderNumber"    column="order_number"    />
+        <result property="chargeStatus"    column="charge_status"    />
+        <result property="isFee"    column="is_fee"    />
+        <result property="consumePower"    column="consume_power"    />
+        <result property="chargingCurrent"    column="charging_current"    />
+        <result property="chargingCdgl"    column="charging_cdgl"    />
+        <result property="customPriceId"    column="custom_price_id"    />
+        <result property="hour"    column="hour"    />
+        <result property="price"    column="price"    />
+        <result property="mobile"    column="mobile"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="code"    column="code"    />
+        <result property="cardNo"    column="card_no"    />
+        <result property="ordergold"    column="ordergold"    />
+        <result property="orderType"    column="order_type"    />
+        <result property="outTradeNo"    column="out_trade_no"    />
+        <result property="realHour"    column="real_hour"    />
+        <result property="realEndTime"    column="real_end_time"    />
+        <result property="refundAmount"    column="refund_amount"    />
+        <result property="deviceType"    column="device_type"    />
+        <result property="chargeFee"    column="charge_fee"    />
+        <result property="serviceFee"    column="service_fee"    />
+        <result property="payTime"    column="pay_time"    />
+        <result property="orderSource"    column="order_source"    />
+        <result property="isGroupOrder"    column="is_group_order"    />
+        <result property="groupCardNo"    column="group_card_no"    />
+        <result property="invoiceId"    column="invoice_id"    />
+        <result property="invoiceNo"    column="invoice_no"    />
+        <result property="stopReason"    column="stop_reason"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectChargingOrderVo">
+        select order_id, user_Id, order_state, pile_id, port_id, start_time, end_time, order_number, charge_status, is_fee, consume_power, charging_current, charging_cdgl, custom_price_id, hour, price, mobile, create_time, code, card_no, ordergold, order_type, out_trade_no, real_hour, real_end_time, refund_amount, device_type, charge_fee, service_fee, pay_time, order_source, is_group_order, group_card_no, invoice_id, invoice_no, stop_reason, tenant_id from c_charging_order
+    </sql>
+
+    <select id="selectChargingOrderList"   resultMap="ChargingOrderResult">
+        <include refid="selectChargingOrderVo"/>
+        <where>
+            <if test="query.userId != null "> and user_Id = #{query.userId}</if>
+            <if test="query.orderState != null  and query.orderState != ''"> and order_state = #{query.orderState}</if>
+            <if test="query.pileId != null  and query.pileId != ''"> and pile_id = #{query.pileId}</if>
+            <if test="query.chargeStatus != null  and query.chargeStatus != ''"> and charge_status = #{query.chargeStatus}</if>
+            <if test="query.isFee != null  and query.isFee != ''"> and is_fee = #{query.isFee}</if>
+            <if test="query.cardNo != null  and query.cardNo != ''"> and card_no = #{query.cardNo}</if>
+            <if test="query.deviceType != null "> and device_type = #{query.deviceType}</if>
+            <if test="query.orderSource != null "> and order_source = #{query.orderSource}</if>
+            <if test="query.isGroupOrder != null "> and is_group_order = #{query.isGroupOrder}</if>
+            <if test="query.groupCardNo != null  and query.groupCardNo != ''"> and group_card_no = #{query.groupCardNo}</if>
+        </where>
+    </select>
+
+    <select id="selectChargingOrderListPage"   resultMap="ChargingOrderResult">
+        SELECT
+        t3.station_name AS stationName,
+        t4.name as portName,
+        CASE
+        WHEN t1.order_state in ('6') and UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(t1.real_end_time) > 1800 THEN '8084'
+        WHEN t1.order_state in ('2','3','5','7') THEN '8082'
+        WHEN t1.order_state in ('4') THEN '8083'
+        WHEN t1.order_state in ('1') THEN '8081'
+        ELSE '8085' END chargingOrderType,
+        IF(t1.card_no is NULL,'在线支付','卡支付') payType,
+        t1.*
+        FROM
+        c_charging_order t1
+        LEFT JOIN c_charging_pile t2 on t2.pile_id = t1.pile_id
+        LEFT JOIN c_charging_station t3 on t3.station_id = t2.station_id
+        LEFT JOIN c_charging_port t4 on t4.pile_id = t2.pile_id
+        <where>
+            <if test="query.userId != null "> and t1.user_Id = #{query.userId}</if>
+            <if test="query.ordernumber != null  and query.ordernumber != ''"> and t1.ordernumber = #{query.ordernumber}</if>
+            <if test="query.stationName != null  and query.stationName != ''"> and t3.station_name = #{query.stationName}</if>
+            <if test="query.pileId != null  and query.pileId != ''"> and t1.pile_id = #{query.pileId}</if>
+            <if test="query.mobile != null  and query.mobile!=''"> and t1.mobile = #{query.mobile}</if>
+            <if test="query.orderType!=null and query.orderType!=''"> and t1.mobile = #{query.mobile}</if>
+            <if test="query.orderState != null  and query.orderState != ''"> and order_state = #{query.orderState}</if>
+
+            <if test="query.chargingOrderType!=null and query.chargingOrderType=='8081'.toString()">
+                AND t1.order_state in ('1')
+            </if>
+
+            <if test="query.chargingOrderType!=null and query.chargingOrderType=='8082'.toString()">
+                AND t1.order_state in ('2','3','5','7')
+            </if>
+
+            <if test="query.chargingOrderType!=null and query.chargingOrderType=='8083'.toString()">
+                AND t1.order_state in ('4')
+            </if>
+
+            <if test="query.chargingOrderType!=null and query.chargingOrderType=='8084'.toString()">
+                AND t1.order_state in ('6') and UNIX_TIMESTAMP(NOW()) - UNIX_TIMESTAMP(t1.real_end_time) > 1800
+            </if>
+
+            <if test="query.startTime!=null and query.startTime!=''">
+                and date_format(t1.create_time,'%Y-%m-%d') BETWEEN #{query.startTime} AND #{query.endTime}
+            </if>
+        </where>
+        GROUP BY t1.order_id ORDER BY t1.create_time desc
+    </select>
+
+    <delete id="deleteChargingOrderByOrderIds" parameterType="String">
+        delete from c_charging_order where order_id in
+        <foreach item="orderId" collection="array" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </delete>
+
+
+    <select id="getManageTotalData" resultType="com.hcp.operator.domain.ManagerTotalDataVO">
+
+        SELECT * FROM
+        (
+        SELECT
+        IFNULL(SUM(IF(t1.order_state IN(3,4,5,6,7 ),t1.ordergold,0)),0) sumSales,
+        IFNULL(SUM(IF(t1.order_state IN(4 ),t1.refund_amount,0)),0) reSales,
+        IFNULL(SUM(IF(t1.order_state IN(3,7 ),t1.charge_fee,0)),0) chargeFee,
+        IFNULL(SUM(IF(t1.order_state IN(3,7 ),t1.service_fee,0)),0) serviceFee,
+        IFNULL(COUNT(t1.order_state!=2),0) sumCount,
+        IFNULL(SUM(IF(t1.order_state IN(3,4,5,6,7 ),TIMESTAMPDIFF(MINUTE, t1.create_time, t1.real_end_time ),0)),0) realHour,
+        IFNULL(SUM(t1.consume_power),0) consumePower
+        FROM c_charging_order t1
+        LEFT JOIN c_charging_pile t2 on t2.pile_id = t1.pile_id
+        LEFT JOIN c_charging_station t3 on t3.station_id = t2.station_id
+        WHERE 1=1
+        <if test="pileVo.userId!=null and pileVo.userId!=''">
+            and t1.user_Id = #{pileVo.userId}
+        </if>
+        <if test="pileVo.chargeNo!=null and pileVo.chargeNo!=''">
+            and t1.pile_id like CONCAT('%',#{pileVo.chargeNo},'%')
+        </if>
+
+        <if test="pileVo.plotName!=null and pileVo.plotName!=''">
+            and t3.station_name like CONCAT('%',#{pileVo.plotName},'%')
+        </if>
+
+        <if test="pileVo.runningStatus!=null and pileVo.runningStatus!=''">
+            and ( t2.running_status = #{pileVo.runningStatus} )
+        </if>
+        <if test="pileVo.startTime!=null and pileVo.startTime!=''">
+            and date_format(t1.create_time,'%Y-%m-%d') BETWEEN #{pileVo.startTime} AND #{pileVo.endTime}
+        </if>
+        )as cp
+        JOIN
+        (
+        SELECT
+        COUNT(*) AS totalNumbers,
+        SUM( CASE WHEN t2.running_status = 1 THEN 1 ELSE 0 END ) AS offLine,
+        SUM( CASE WHEN t2.running_status = 0 THEN 1 ELSE 0 END ) AS ONLINE
+        FROM c_charging_pile t2
+        LEFT JOIN c_charging_station t3 on t3.station_id = t2.station_id
+        WHERE 1=1
+        <if test="pileVo.userId!=null and pileVo.userId!=''">
+            and t2.user_id = #{pileVo.userId}
+        </if>
+        <if test="pileVo.chargeNo!=null and pileVo.chargeNo!=''">
+            and t2.pile_id like CONCAT('%',#{pileVo.chargeNo},'%')
+        </if>
+
+        <if test="pileVo.plotName!=null and pileVo.plotName!=''">
+            and t3.station_name like CONCAT('%',#{pileVo.plotName},'%')
+        </if>
+
+        <if test="pileVo.runningStatus!=null and pileVo.runningStatus!=''">
+            and ( t2.running_status = #{pileVo.runningStatus} )
+        </if>
+        <if test="pileVo.startTime!=null and pileVo.startTime!=''">
+            and date_format(t2.create_time,'%Y-%m-%d') BETWEEN #{pileVo.startTime} AND #{pileVo.endTime}
+        </if>
+        )co ON 1=1
+
+
+    </select>
+
+    <select id="selectChargingOrderByOrderNumber"   resultMap="ChargingOrderResult">
+        SELECT
+            cco.*,
+            tu.user_name AS userName,
+            ccp.name pileName,
+            cp.address,
+            ccp.pile_type pileType,
+            ccp2.NAME portName,
+            ccp.electricity,
+            ccp.voltage,
+            ccp.max_power maxPower
+        FROM
+            c_charging_order cco
+                LEFT JOIN c_charging_pile ccp ON cco.pile_id = ccp.pile_id
+                LEFT JOIN c_charging_station cp ON cp.station_id = ccp.station_id
+                LEFT JOIN c_charging_port ccp2 ON ccp2.port_id = cco.port_id
+                LEFT JOIN sys_user tu ON tu.user_id = cco.user_id
+        where cco.order_number = #{orderNumber}
+    </select>
+    <select id="findChargingOrder" resultType="com.hcp.system.api.domain.ChargingOrder">
+        <include refid="selectChargingOrderVo"/> where pile_id = #{pileId} and port_id = #{portId} and charge_status = #{chargingStatus} order by create_time desc limit 1
+    </select>
+    <select id="getById" resultType="com.hcp.system.api.domain.ChargingOrder">
+        <include refid="selectChargingOrderVo"/> where order_id = #{orderId}
+    </select>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ChargingOrderResult">
+        <include refid="selectChargingOrderVo" />
+        where  order_id = #{orderId,jdbcType=VARCHAR}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from c_charging_order
+        where  order_id = #{orderId,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insertOrder" keyColumn="order_id" keyProperty="orderId" parameterType="com.hcp.system.api.domain.ChargingOrder" useGeneratedKeys="true">
+        insert into c_charging_order
+        ( order_id,user_id,order_state
+        ,pile_id,port_id,start_time
+        ,end_time,order_number,charge_status
+        ,is_fee,consume_power,charging_current
+        ,charging_cdgl,custom_price_id,hour
+        ,price,mobile,create_time
+        ,code,card_no,ordergold
+        ,order_type,out_trade_no,real_hour
+        ,real_end_time,refund_amount,device_type
+        ,charge_fee,service_fee,pay_time
+        ,order_source,is_group_order,group_card_no
+        ,invoice_id,invoice_no,stop_reason
+        ,tenant_id,create_by,update_time
+        ,update_by)
+        values (#{orderId,jdbcType=VARCHAR},#{userId,jdbcType=BIGINT},#{orderState,jdbcType=VARCHAR}
+               ,#{pileId,jdbcType=VARCHAR},#{portId,jdbcType=BIGINT},#{startTime,jdbcType=VARCHAR}
+               ,#{endTime,jdbcType=VARCHAR},#{orderNumber,jdbcType=VARCHAR},#{chargeStatus,jdbcType=VARCHAR}
+               ,#{isFee,jdbcType=VARCHAR},#{consumePower,jdbcType=DECIMAL},#{chargingCurrent,jdbcType=VARCHAR}
+               ,#{chargingCdgl,jdbcType=VARCHAR},#{customPriceId,jdbcType=VARCHAR},#{hour,jdbcType=VARCHAR}
+               ,#{price,jdbcType=VARCHAR},#{mobile,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP}
+               ,#{code,jdbcType=VARCHAR},#{cardNo,jdbcType=VARCHAR},#{ordergold,jdbcType=VARCHAR}
+               ,#{orderType,jdbcType=VARCHAR},#{outTradeNo,jdbcType=VARCHAR},#{realHour,jdbcType=VARCHAR}
+               ,#{realEndTime,jdbcType=TIMESTAMP},#{refundAmount,jdbcType=DECIMAL},#{deviceType,jdbcType=INTEGER}
+               ,#{chargeFee,jdbcType=DECIMAL},#{serviceFee,jdbcType=DECIMAL},#{payTime,jdbcType=TIMESTAMP}
+               ,#{orderSource,jdbcType=INTEGER},#{isGroupOrder,jdbcType=INTEGER},#{groupCardNo,jdbcType=VARCHAR}
+               ,#{invoiceId,jdbcType=INTEGER},#{invoiceNo,jdbcType=VARCHAR},#{stopReason,jdbcType=VARCHAR}
+               ,#{tenantId,jdbcType=BIGINT},#{createBy,jdbcType=VARCHAR},#{updateTime,jdbcType=TIMESTAMP}
+               ,#{updateBy,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="order_id" keyProperty="orderId" parameterType="com.hcp.system.api.domain.ChargingOrder" useGeneratedKeys="true">
+        insert into c_charging_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">order_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="orderState != null">order_state,</if>
+            <if test="pileId != null">pile_id,</if>
+            <if test="portId != null">port_id,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="orderNumber != null">order_number,</if>
+            <if test="chargeStatus != null">charge_status,</if>
+            <if test="isFee != null">is_fee,</if>
+            <if test="consumePower != null">consume_power,</if>
+            <if test="chargingCurrent != null">charging_current,</if>
+            <if test="chargingCdgl != null">charging_cdgl,</if>
+            <if test="customPriceId != null">custom_price_id,</if>
+            <if test="hour != null">hour,</if>
+            <if test="price != null">price,</if>
+            <if test="mobile != null">mobile,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="code != null">code,</if>
+            <if test="cardNo != null">card_no,</if>
+            <if test="ordergold != null">ordergold,</if>
+            <if test="orderType != null">order_type,</if>
+            <if test="outTradeNo != null">out_trade_no,</if>
+            <if test="realHour != null">real_hour,</if>
+            <if test="realEndTime != null">real_end_time,</if>
+            <if test="refundAmount != null">refund_amount,</if>
+            <if test="deviceType != null">device_type,</if>
+            <if test="chargeFee != null">charge_fee,</if>
+            <if test="serviceFee != null">service_fee,</if>
+            <if test="payTime != null">pay_time,</if>
+            <if test="orderSource != null">order_source,</if>
+            <if test="isGroupOrder != null">is_group_order,</if>
+            <if test="groupCardNo != null">group_card_no,</if>
+            <if test="invoiceId != null">invoice_id,</if>
+            <if test="invoiceNo != null">invoice_no,</if>
+            <if test="stopReason != null">stop_reason,</if>
+            <if test="tenantId != null">tenant_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">#{orderId,jdbcType=VARCHAR},</if>
+            <if test="userId != null">#{userId,jdbcType=BIGINT},</if>
+            <if test="orderState != null">#{orderState,jdbcType=VARCHAR},</if>
+            <if test="pileId != null">#{pileId,jdbcType=VARCHAR},</if>
+            <if test="portId != null">#{portId,jdbcType=BIGINT},</if>
+            <if test="startTime != null">#{startTime,jdbcType=VARCHAR},</if>
+            <if test="endTime != null">#{endTime,jdbcType=VARCHAR},</if>
+            <if test="orderNumber != null">#{orderNumber,jdbcType=VARCHAR},</if>
+            <if test="chargeStatus != null">#{chargeStatus,jdbcType=VARCHAR},</if>
+            <if test="isFee != null">#{isFee,jdbcType=VARCHAR},</if>
+            <if test="consumePower != null">#{consumePower,jdbcType=DECIMAL},</if>
+            <if test="chargingCurrent != null">#{chargingCurrent,jdbcType=VARCHAR},</if>
+            <if test="chargingCdgl != null">#{chargingCdgl,jdbcType=VARCHAR},</if>
+            <if test="customPriceId != null">#{customPriceId,jdbcType=VARCHAR},</if>
+            <if test="hour != null">#{hour,jdbcType=VARCHAR},</if>
+            <if test="price != null">#{price,jdbcType=VARCHAR},</if>
+            <if test="mobile != null">#{mobile,jdbcType=VARCHAR},</if>
+            <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="code != null">#{code,jdbcType=VARCHAR},</if>
+            <if test="cardNo != null">#{cardNo,jdbcType=VARCHAR},</if>
+            <if test="ordergold != null">#{ordergold,jdbcType=VARCHAR},</if>
+            <if test="orderType != null">#{orderType,jdbcType=VARCHAR},</if>
+            <if test="outTradeNo != null">#{outTradeNo,jdbcType=VARCHAR},</if>
+            <if test="realHour != null">#{realHour,jdbcType=VARCHAR},</if>
+            <if test="realEndTime != null">#{realEndTime,jdbcType=TIMESTAMP},</if>
+            <if test="refundAmount != null">#{refundAmount,jdbcType=DECIMAL},</if>
+            <if test="deviceType != null">#{deviceType,jdbcType=INTEGER},</if>
+            <if test="chargeFee != null">#{chargeFee,jdbcType=DECIMAL},</if>
+            <if test="serviceFee != null">#{serviceFee,jdbcType=DECIMAL},</if>
+            <if test="payTime != null">#{payTime,jdbcType=TIMESTAMP},</if>
+            <if test="orderSource != null">#{orderSource,jdbcType=INTEGER},</if>
+            <if test="isGroupOrder != null">#{isGroupOrder,jdbcType=INTEGER},</if>
+            <if test="groupCardNo != null">#{groupCardNo,jdbcType=VARCHAR},</if>
+            <if test="invoiceId != null">#{invoiceId,jdbcType=INTEGER},</if>
+            <if test="invoiceNo != null">#{invoiceNo,jdbcType=VARCHAR},</if>
+            <if test="stopReason != null">#{stopReason,jdbcType=VARCHAR},</if>
+            <if test="tenantId != null">#{tenantId,jdbcType=BIGINT},</if>
+            <if test="createBy != null">#{createBy,jdbcType=VARCHAR},</if>
+            <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
+            <if test="updateBy != null">#{updateBy,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hcp.system.api.domain.ChargingOrder">
+        update c_charging_order
+        <set>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="orderState != null">
+                order_state = #{orderState,jdbcType=VARCHAR},
+            </if>
+            <if test="pileId != null">
+                pile_id = #{pileId,jdbcType=VARCHAR},
+            </if>
+            <if test="portId != null">
+                port_id = #{portId,jdbcType=BIGINT},
+            </if>
+            <if test="startTime != null">
+                start_time = #{startTime,jdbcType=VARCHAR},
+            </if>
+            <if test="endTime != null">
+                end_time = #{endTime,jdbcType=VARCHAR},
+            </if>
+            <if test="orderNumber != null">
+                order_number = #{orderNumber,jdbcType=VARCHAR},
+            </if>
+            <if test="chargeStatus != null">
+                charge_status = #{chargeStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="isFee != null">
+                is_fee = #{isFee,jdbcType=VARCHAR},
+            </if>
+            <if test="consumePower != null">
+                consume_power = #{consumePower,jdbcType=DECIMAL},
+            </if>
+            <if test="chargingCurrent != null">
+                charging_current = #{chargingCurrent,jdbcType=VARCHAR},
+            </if>
+            <if test="chargingCdgl != null">
+                charging_cdgl = #{chargingCdgl,jdbcType=VARCHAR},
+            </if>
+            <if test="customPriceId != null">
+                custom_price_id = #{customPriceId,jdbcType=VARCHAR},
+            </if>
+            <if test="hour != null">
+                hour = #{hour,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null">
+                price = #{price,jdbcType=VARCHAR},
+            </if>
+            <if test="mobile != null">
+                mobile = #{mobile,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="code != null">
+                code = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="cardNo != null">
+                card_no = #{cardNo,jdbcType=VARCHAR},
+            </if>
+            <if test="ordergold != null">
+                ordergold = #{ordergold,jdbcType=VARCHAR},
+            </if>
+            <if test="orderType != null">
+                order_type = #{orderType,jdbcType=VARCHAR},
+            </if>
+            <if test="outTradeNo != null">
+                out_trade_no = #{outTradeNo,jdbcType=VARCHAR},
+            </if>
+            <if test="realHour != null">
+                real_hour = #{realHour,jdbcType=VARCHAR},
+            </if>
+            <if test="realEndTime != null">
+                real_end_time = #{realEndTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="refundAmount != null">
+                refund_amount = #{refundAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="deviceType != null">
+                device_type = #{deviceType,jdbcType=INTEGER},
+            </if>
+            <if test="chargeFee != null">
+                charge_fee = #{chargeFee,jdbcType=DECIMAL},
+            </if>
+            <if test="serviceFee != null">
+                service_fee = #{serviceFee,jdbcType=DECIMAL},
+            </if>
+            <if test="payTime != null">
+                pay_time = #{payTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="orderSource != null">
+                order_source = #{orderSource,jdbcType=INTEGER},
+            </if>
+            <if test="isGroupOrder != null">
+                is_group_order = #{isGroupOrder,jdbcType=INTEGER},
+            </if>
+            <if test="groupCardNo != null">
+                group_card_no = #{groupCardNo,jdbcType=VARCHAR},
+            </if>
+            <if test="invoiceId != null">
+                invoice_id = #{invoiceId,jdbcType=INTEGER},
+            </if>
+            <if test="invoiceNo != null">
+                invoice_no = #{invoiceNo,jdbcType=VARCHAR},
+            </if>
+            <if test="stopReason != null">
+                stop_reason = #{stopReason,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where   order_id = #{orderId,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hcp.system.api.domain.ChargingOrder">
+        update c_charging_order
+        set
+            user_id =  #{userId,jdbcType=BIGINT},
+            order_state =  #{orderState,jdbcType=VARCHAR},
+            pile_id =  #{pileId,jdbcType=VARCHAR},
+            port_id =  #{portId,jdbcType=BIGINT},
+            start_time =  #{startTime,jdbcType=VARCHAR},
+            end_time =  #{endTime,jdbcType=VARCHAR},
+            order_number =  #{orderNumber,jdbcType=VARCHAR},
+            charge_status =  #{chargeStatus,jdbcType=VARCHAR},
+            is_fee =  #{isFee,jdbcType=VARCHAR},
+            consume_power =  #{consumePower,jdbcType=DECIMAL},
+            charging_current =  #{chargingCurrent,jdbcType=VARCHAR},
+            charging_cdgl =  #{chargingCdgl,jdbcType=VARCHAR},
+            custom_price_id =  #{customPriceId,jdbcType=VARCHAR},
+            hour =  #{hour,jdbcType=VARCHAR},
+            price =  #{price,jdbcType=VARCHAR},
+            mobile =  #{mobile,jdbcType=VARCHAR},
+            create_time =  #{createTime,jdbcType=TIMESTAMP},
+            code =  #{code,jdbcType=VARCHAR},
+            card_no =  #{cardNo,jdbcType=VARCHAR},
+            ordergold =  #{ordergold,jdbcType=VARCHAR},
+            order_type =  #{orderType,jdbcType=VARCHAR},
+            out_trade_no =  #{outTradeNo,jdbcType=VARCHAR},
+            real_hour =  #{realHour,jdbcType=VARCHAR},
+            real_end_time =  #{realEndTime,jdbcType=TIMESTAMP},
+            refund_amount =  #{refundAmount,jdbcType=DECIMAL},
+            device_type =  #{deviceType,jdbcType=INTEGER},
+            charge_fee =  #{chargeFee,jdbcType=DECIMAL},
+            service_fee =  #{serviceFee,jdbcType=DECIMAL},
+            pay_time =  #{payTime,jdbcType=TIMESTAMP},
+            order_source =  #{orderSource,jdbcType=INTEGER},
+            is_group_order =  #{isGroupOrder,jdbcType=INTEGER},
+            group_card_no =  #{groupCardNo,jdbcType=VARCHAR},
+            invoice_id =  #{invoiceId,jdbcType=INTEGER},
+            invoice_no =  #{invoiceNo,jdbcType=VARCHAR},
+            stop_reason =  #{stopReason,jdbcType=VARCHAR},
+            tenant_id =  #{tenantId,jdbcType=BIGINT},
+            create_by =  #{createBy,jdbcType=VARCHAR},
+            update_time =  #{updateTime,jdbcType=TIMESTAMP},
+            update_by =  #{updateBy,jdbcType=VARCHAR}
+        where   order_id = #{orderId,jdbcType=VARCHAR}
+    </update>
+
+</mapper>

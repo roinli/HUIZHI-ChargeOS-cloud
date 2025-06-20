@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.RuleMapper">
+
+    <resultMap type="com.hcp.operator.domain.Rule" id="RuleResult">
+        <result property="id"    column="id"    />
+        <result property="changeName"    column="change_name"    />
+        <result property="chargeType"    column="charge_type"    />
+        <result property="ruleType"    column="rule_type"    />
+        <result property="userId"    column="user_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="isGive"    column="is_give"    />
+        <result property="isSysGive"    column="is_sys_give"    />
+        <result property="deviceType"    column="device_type"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="maxHour"    column="max_hour"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectRuleVo">
+        select id, change_name, charge_type, rule_type, user_id, create_time, is_give, is_sys_give, device_type, update_time, max_hour, tenant_id from c_rule
+    </sql>
+
+    <select id="selectRuleList"   resultMap="RuleResult">
+        <include refid="selectRuleVo"/>
+        <where>
+            <if test="query.changeName != null  and query.changeName != ''"> and change_name like concat('%', #{query.changeName}, '%')</if>
+            <if test="query.chargeType != null  and query.chargeType != ''"> and charge_type = #{query.chargeType}</if>
+            <if test="query.ruleType != null  and query.ruleType != ''"> and rule_type = #{query.ruleType}</if>
+            <if test="query.userId != null "> and user_id = #{query.userId}</if>
+            <if test="query.deviceType != null "> and device_type = #{query.deviceType}</if>
+        </where>
+    </select>
+
+    <delete id="deleteRuleByIds" parameterType="String">
+        delete from c_rule where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectRuleListAll"   resultMap="RuleResult">
+        SELECT
+        *
+        FROM
+        ( SELECT a.*, us.nick_name userName, us.user_id userId FROM c_rule a LEFT JOIN sys_user us ON us.user_id = a.user_id ) a
+
+        <where>
+            <if test="query.changeName != null  and query.changeName != ''"> and a.change_name like concat('%', #{query.changeName}, '%')</if>
+            <if test="query.userId != null "> and a.user_id = #{query.userId}</if>
+        </where>
+        order by a.create_time desc
+    </select>
+
+    <select id="getRulePriceListById" parameterType="int" resultType="map">
+        SELECT
+            a.price_id,
+            a.charge_type chargeType,
+            a.time,
+            a.price,
+            a.hours,
+            a.type,
+            ( CASE type WHEN 1 THEN '固定' WHEN 2 THEN '自定义' END ) typeName,
+            a.granternum,
+            a.granterprice,
+            a.rule_id ruleId,
+            r.rule_type ruleType,
+            r.change_name ruleName,
+            a.rang_time rangTime,
+            a.price_type priceType,
+            a.service_price servicePrice,
+            DATE_FORMAT( a.create_time, '%Y-%m-%d' ) createTime
+        FROM
+            c_custom_price a
+                INNER JOIN c_rule r ON a.rule_id = r.id
+        WHERE
+            a.rule_id = #{ruleId}
+          AND a.del_flag = 0
+        ORDER BY
+            a.pile_id DESC
+
+    </select>
+
+    <!--获取使用规则的充电桩数量-->
+    <select id="getRoleUseContById" parameterType="int" resultType="int">
+        select
+            count(id)
+        from
+            c_charging_pile
+        where wx_rule_id = #{id}
+           or card_rule_id = #{id}
+    </select>
+</mapper>

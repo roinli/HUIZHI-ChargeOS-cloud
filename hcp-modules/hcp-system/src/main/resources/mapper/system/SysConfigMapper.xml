@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.system.mapper.SysConfigMapper">
+
+    <resultMap type="com.hcp.system.domain.SysConfig" id="SysConfigResult">
+        <id     property="configId"      column="config_id"      />
+        <result property="configName"    column="config_name"    />
+        <result property="configKey"     column="config_key"     />
+        <result property="configValue"   column="config_value"   />
+        <result property="configType"    column="config_type"    />
+        <result property="createBy"      column="create_by"      />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"      column="update_by"      />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectConfigVo">
+        select config_id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+        from sys_config
+    </sql>
+
+    <!-- 查询条件 -->
+    <sql id="sqlwhereSearch">
+        <where>
+            <if test="configId !=null">
+                and config_id = #{configId}
+            </if>
+            <if test="configKey !=null and configKey != ''">
+                and config_key = #{configKey}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectConfig"  resultMap="SysConfigResult">
+        <include refid="selectConfigVo"/>
+        <include refid="sqlwhereSearch"/>
+    </select>
+
+    <select id="selectConfigList"  resultMap="SysConfigResult">
+        <include refid="selectConfigVo"/>
+        <where>
+            <if test="query.configName != null and query.configName != ''">
+                AND config_name like concat('%', #{query.configName}, '%')
+            </if>
+            <if test="query.configType != null and query.configType != ''">
+                AND config_type = #{query.configType}
+            </if>
+            <if test="query.configKey != null and query.configKey != ''">
+                AND config_key like concat('%', #{query.configKey}, '%')
+            </if>
+            <if test="query.params.beginTime != null and query.params.beginTime != ''">
+                and date_format(create_time,'%y%m%d') &gt;= date_format(#{query.params.beginTime},'%y%m%d')
+            </if>
+            <if test="query.params.endTime != null and query.params.endTime != ''">
+                and date_format(create_time,'%y%m%d') &lt;= date_format(#{query.params.endTime},'%y%m%d')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectConfigById" parameterType="Long" resultMap="SysConfigResult">
+        <include refid="selectConfigVo"/>
+        where config_id = #{configId}
+    </select>
+
+    <select id="checkConfigKeyUnique" parameterType="String" resultMap="SysConfigResult">
+        <include refid="selectConfigVo"/>
+        where config_key = #{configKey} limit 1
+    </select>
+
+    <delete id="deleteConfigByIds" parameterType="Long">
+        delete from sys_config where config_id in
+        <foreach item="configId" collection="array" open="(" separator="," close=")">
+            #{configId}
+        </foreach>
+    </delete>
+
+</mapper>

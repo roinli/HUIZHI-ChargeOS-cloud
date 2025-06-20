@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.ChargingPortMapper">
+
+    <resultMap type="com.hcp.system.api.domain.ChargingPort" id="ChargingPortResult">
+        <result property="portId"    column="port_id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="state"    column="state"    />
+        <result property="power"    column="power"    />
+        <result property="name"    column="name"    />
+        <result property="pileId"    column="pile_id"    />
+        <result property="deviceId"    column="device_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="gunInsert"    column="gun_insert"    />
+        <result property="gunStatus"    column="gun_status"    />
+        <result property="canUse"    column="can_use"    />
+        <result property="faultCode"    column="fault_code"    />
+        <result property="faultReason"    column="fault_reason"    />
+        <result property="faultTime"    column="fault_time"    />
+        <result property="qrCode"    column="qr_code"    />
+        <result property="isHlht"    column="is_hlht"    />
+        <result property="hlhtId"    column="hlht_id"    />
+        <result property="tenantId"    column="tenant_id"    />
+        <result property="pileType"    column="pile_type"    />
+    </resultMap>
+
+    <sql id="selectChargingPortVo">
+        select port_id, user_id, state, power, name, pile_id, device_id, create_time, gun_insert, gun_status, can_use, fault_code, fault_reason, fault_time, qr_code, is_hlht, hlht_id, tenant_id from c_charging_port
+    </sql>
+
+    <select id="selectChargingPortList"   resultType="com.hcp.system.api.domain.ChargingPort">
+        SELECT
+        t1.*,
+        t2.pile_type,
+        t2.running_status,
+        o.charging_current,
+        o.charging_cdgl,
+        o.consume_power,
+        o.real_hour,
+        ( SELECT COUNT(*) FROM c_charging_order o2 WHERE t1.port_id = o2.port_id ) AS useCount
+        FROM
+        c_charging_port t1
+        LEFT JOIN c_charging_pile t2 ON t2.pile_id = t1.pile_id
+        LEFT JOIN (
+        SELECT
+        *
+        FROM
+        ( SELECT *, ROW_NUMBER() OVER ( PARTITION BY port_id ORDER BY create_time DESC ) AS rn FROM c_charging_order WHERE charge_status = 9002 ) AS filtered_orders
+        WHERE
+        rn = 1 ) o ON t1.port_id = o.port_id
+        <where>
+            <if test="query.state != null  and query.state != ''"> and t1.state = #{query.state}</if>
+            <if test="query.stationId != null"> and t2.station_id = #{query.stationId}</if>
+            <if test="query.pileId != null  and query.pileId != ''"> and t1.pile_id = #{query.pileId}</if>
+            <if test="query.gunInsert != null  and query.gunInsert != ''"> and t1.gun_insert = #{query.gunInsert}</if>
+            <if test="query.gunStatus != null "> and t1.gun_status = #{query.gunStatus}</if>
+        </where>
+        GROUP BY t1.port_id
+        ORDER BY t1.create_time DESC
+    </select>
+    <select id="selectPort" resultType="com.hcp.system.api.domain.ChargingPort">
+        <include refid="selectChargingPortVo"/> where pile_id = #{pileId} and device_id = #{port}
+    </select>
+    <select id="queryPortInfoVo" resultType="com.hcp.system.api.domain.vo.PilePortVO"
+            parameterType="com.hcp.system.api.domain.vo.PlotInfoReqVO">
+        select
+            ccp.port_id id,
+            ccp.STATE,
+            ccp.pile_id pileId,
+            ccp2.pile_type pileType,
+            ccp2.device_type deviceType,
+            (select min(price) from c_custom_price cp3 where cp3.rule_id = ccp2.wx_rule_id ) price,
+            (select min(service_price) from c_custom_price cp3 where cp3.rule_id = ccp2.wx_rule_id ) servicePrice,
+            (select min(hours) from c_custom_price cp3 where cp3.rule_id = ccp2.wx_rule_id ) hours
+        from
+            c_charging_port ccp
+                left join c_charging_pile ccp2 on ccp.pile_id = ccp2.pile_id
+                left join c_charging_station cp on cp.station_id = ccp2.station_id
+        where
+            cp.station_id = #{plotInfoReqVO.stationId}
+          and ccp2.device_type = '4'
+          and ccp2.pile_status = 1
+    </select>
+
+    <delete id="deleteChargingPortByPortIds" parameterType="String">
+        delete from c_charging_port where port_id in
+        <foreach item="portId" collection="array" open="(" separator="," close=")">
+            #{portId}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ChargingPortResult">
+        <include refid="selectChargingPortVo" />
+        where  port_id = #{portId,jdbcType=BIGINT}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from c_charging_port
+        where  port_id = #{portId,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertPort" keyColumn="port_id" keyProperty="portId" parameterType="com.hcp.system.api.domain.ChargingPort" useGeneratedKeys="true">
+        insert into c_charging_port
+        ( port_id,user_id,state
+        ,power,name,pile_id
+        ,device_id,create_time,gun_insert
+        ,gun_status,can_use,fault_code
+        ,fault_reason,fault_time,qr_code
+        ,is_hlht,hlht_id,tenant_id
+        ,create_by,update_time,update_by
+        )
+        values (#{portId,jdbcType=BIGINT},#{userId,jdbcType=BIGINT},#{state,jdbcType=VARCHAR}
+               ,#{power,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{pileId,jdbcType=VARCHAR}
+               ,#{deviceId,jdbcType=VARCHAR},#{createTime,jdbcType=TIMESTAMP},#{gunInsert,jdbcType=VARCHAR}
+               ,#{gunStatus,jdbcType=INTEGER},#{canUse,jdbcType=INTEGER},#{faultCode,jdbcType=INTEGER}
+               ,#{faultReason,jdbcType=VARCHAR},#{faultTime,jdbcType=TIMESTAMP},#{qrCode,jdbcType=VARCHAR}
+               ,#{isHlht,jdbcType=INTEGER},#{hlhtId,jdbcType=VARCHAR},#{tenantId,jdbcType=BIGINT}
+               ,#{createBy,jdbcType=VARCHAR},#{updateTime,jdbcType=TIMESTAMP},#{updateBy,jdbcType=VARCHAR}
+               )
+    </insert>
+    <insert id="insertSelective" keyColumn="port_id" keyProperty="portId" parameterType="com.hcp.system.api.domain.ChargingPort" useGeneratedKeys="true">
+        insert into c_charging_port
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="portId != null">port_id,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="state != null">state,</if>
+            <if test="power != null">power,</if>
+            <if test="name != null">name,</if>
+            <if test="pileId != null">pile_id,</if>
+            <if test="deviceId != null">device_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="gunInsert != null">gun_insert,</if>
+            <if test="gunStatus != null">gun_status,</if>
+            <if test="canUse != null">can_use,</if>
+            <if test="faultCode != null">fault_code,</if>
+            <if test="faultReason != null">fault_reason,</if>
+            <if test="faultTime != null">fault_time,</if>
+            <if test="qrCode != null">qr_code,</if>
+            <if test="isHlht != null">is_hlht,</if>
+            <if test="hlhtId != null">hlht_id,</if>
+            <if test="tenantId != null">tenant_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="portId != null">#{portId,jdbcType=BIGINT},</if>
+            <if test="userId != null">#{userId,jdbcType=BIGINT},</if>
+            <if test="state != null">#{state,jdbcType=VARCHAR},</if>
+            <if test="power != null">#{power,jdbcType=VARCHAR},</if>
+            <if test="name != null">#{name,jdbcType=VARCHAR},</if>
+            <if test="pileId != null">#{pileId,jdbcType=VARCHAR},</if>
+            <if test="deviceId != null">#{deviceId,jdbcType=VARCHAR},</if>
+            <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="gunInsert != null">#{gunInsert,jdbcType=VARCHAR},</if>
+            <if test="gunStatus != null">#{gunStatus,jdbcType=INTEGER},</if>
+            <if test="canUse != null">#{canUse,jdbcType=INTEGER},</if>
+            <if test="faultCode != null">#{faultCode,jdbcType=INTEGER},</if>
+            <if test="faultReason != null">#{faultReason,jdbcType=VARCHAR},</if>
+            <if test="faultTime != null">#{faultTime,jdbcType=TIMESTAMP},</if>
+            <if test="qrCode != null">#{qrCode,jdbcType=VARCHAR},</if>
+            <if test="isHlht != null">#{isHlht,jdbcType=INTEGER},</if>
+            <if test="hlhtId != null">#{hlhtId,jdbcType=VARCHAR},</if>
+            <if test="tenantId != null">#{tenantId,jdbcType=BIGINT},</if>
+            <if test="createBy != null">#{createBy,jdbcType=VARCHAR},</if>
+            <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
+            <if test="updateBy != null">#{updateBy,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hcp.system.api.domain.ChargingPort">
+        update c_charging_port
+        <set>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="state != null">
+                state = #{state,jdbcType=VARCHAR},
+            </if>
+            <if test="power != null">
+                power = #{power,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="pileId != null">
+                pile_id = #{pileId,jdbcType=VARCHAR},
+            </if>
+            <if test="deviceId != null">
+                device_id = #{deviceId,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="gunInsert != null">
+                gun_insert = #{gunInsert,jdbcType=VARCHAR},
+            </if>
+            <if test="gunStatus != null">
+                gun_status = #{gunStatus,jdbcType=INTEGER},
+            </if>
+            <if test="canUse != null">
+                can_use = #{canUse,jdbcType=INTEGER},
+            </if>
+            <if test="faultCode != null">
+                fault_code = #{faultCode,jdbcType=INTEGER},
+            </if>
+            <if test="faultReason != null">
+                fault_reason = #{faultReason,jdbcType=VARCHAR},
+            </if>
+            <if test="faultTime != null">
+                fault_time = #{faultTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="qrCode != null">
+                qr_code = #{qrCode,jdbcType=VARCHAR},
+            </if>
+            <if test="isHlht != null">
+                is_hlht = #{isHlht,jdbcType=INTEGER},
+            </if>
+            <if test="hlhtId != null">
+                hlht_id = #{hlhtId,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where   port_id = #{portId,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hcp.system.api.domain.ChargingPort">
+        update c_charging_port
+        set
+            user_id =  #{userId,jdbcType=BIGINT},
+            state =  #{state,jdbcType=VARCHAR},
+            power =  #{power,jdbcType=VARCHAR},
+            name =  #{name,jdbcType=VARCHAR},
+            pile_id =  #{pileId,jdbcType=VARCHAR},
+            device_id =  #{deviceId,jdbcType=VARCHAR},
+            create_time =  #{createTime,jdbcType=TIMESTAMP},
+            gun_insert =  #{gunInsert,jdbcType=VARCHAR},
+            gun_status =  #{gunStatus,jdbcType=INTEGER},
+            can_use =  #{canUse,jdbcType=INTEGER},
+            fault_code =  #{faultCode,jdbcType=INTEGER},
+            fault_reason =  #{faultReason,jdbcType=VARCHAR},
+            fault_time =  #{faultTime,jdbcType=TIMESTAMP},
+            qr_code =  #{qrCode,jdbcType=VARCHAR},
+            is_hlht =  #{isHlht,jdbcType=INTEGER},
+            hlht_id =  #{hlhtId,jdbcType=VARCHAR},
+            tenant_id =  #{tenantId,jdbcType=BIGINT},
+            create_by =  #{createBy,jdbcType=VARCHAR},
+            update_time =  #{updateTime,jdbcType=TIMESTAMP},
+            update_by =  #{updateBy,jdbcType=VARCHAR}
+        where   port_id = #{portId,jdbcType=BIGINT}
+    </update>
+</mapper>

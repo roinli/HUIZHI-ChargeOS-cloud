@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.job.mapper.XxlJobGroupMapper">
+
+    <resultMap type="com.hcp.job.domain.XxlJobGroup" id="XxlJobGroupResult">
+        <result property="id"    column="id"    />
+        <result property="appname"    column="app_name"    />
+        <result property="title"    column="title"    />
+        <result property="addressType"    column="address_type"    />
+        <result property="addressList"    column="address_list"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <insert id="insert" parameterType="com.hcp.job.domain.XxlJobGroup" useGeneratedKeys="true" keyProperty="id" >
+        INSERT INTO xxl_job_group ( `app_name`, `title`, `address_type`, `address_list`, `update_time`)
+        values ( #{appname}, #{title}, #{addressType}, #{addressList}, #{updateTime} );
+    </insert>
+
+
+    <sql id="selectXxlJobGroupVo">
+        select id, app_name, title, address_type, address_list, update_time, tenant_id from xxl_job_group
+    </sql>
+
+    <select id="load" parameterType="java.lang.Integer" resultMap="XxlJobGroupResult">
+         <include refid="selectXxlJobGroupVo" />
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectXxlJobGroupList"   resultMap="XxlJobGroupResult">
+        <include refid="selectXxlJobGroupVo"/>
+        <where>
+            <if test="query.appName != null  and query.appName != ''"> and app_name like concat('%', #{query.appName}, '%')</if>
+            <if test="query.title != null  and query.title != ''"> and title = #{query.title}</if>
+            <if test="query.addressType != null "> and address_type = #{query.addressType}</if>
+            <if test="query.addressList != null  and query.addressList != ''"> and address_list = #{query.addressList}</if>
+            <if test="query.tenantId != null "> and tenant_id = #{query.tenantId}</if>
+        </where>
+    </select>
+
+    <update id="update" parameterType="com.hcp.job.domain.XxlJobGroup" >
+        UPDATE xxl_job_group
+        SET `app_name` = #{appname},
+            `title` = #{title},
+            `address_type` = #{addressType},
+            `address_list` = #{addressList},
+            `update_time` = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteXxlJobGroupByIds" parameterType="String">
+        delete from xxl_job_group where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="findByAddressType" parameterType="java.lang.Integer" resultMap="XxlJobGroupResult">
+        <include refid="selectXxlJobGroupVo" />
+        WHERE address_type = #{addressType}
+        ORDER BY app_name, title, id ASC
+    </select>
+
+    <select id="getById" resultMap="XxlJobGroupResult">
+        <include refid="selectXxlJobGroupVo" /> where id = #{id}
+    </select>
+</mapper>

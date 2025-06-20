@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.CustomPriceMapper">
+
+    <resultMap type="com.hcp.operator.domain.CustomPrice" id="CustomPriceResult">
+        <result property="priceId"    column="price_id"    />
+        <result property="chargeType"    column="charge_type"    />
+        <result property="time"    column="time"    />
+        <result property="price"    column="price"    />
+        <result property="hours"    column="hours"    />
+        <result property="type"    column="type"    />
+        <result property="granternum"    column="granternum"    />
+        <result property="granterprice"    column="granterprice"    />
+        <result property="pileId"    column="pile_id"    />
+        <result property="ruleId"    column="rule_id"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="servicePrice"    column="service_price"    />
+        <result property="minWatt"    column="min_watt"    />
+        <result property="maxWatt"    column="max_watt"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="priceType"    column="price_type"    />
+        <result property="rangTime"    column="rang_time"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectCustomPriceVo">
+        select price_id, charge_type, time, price, hours, type, granternum, granterprice, pile_id, rule_id, del_flag, service_price, min_watt, max_watt, create_time, update_time, price_type, rang_time, tenant_id from c_custom_price
+    </sql>
+
+    <select id="selectCustomPriceList"   resultMap="CustomPriceResult">
+        <include refid="selectCustomPriceVo"/>
+        <where>
+            <if test="query.pileId != null  and query.pileId != ''"> and pile_id = #{query.pileId}</if>
+            <if test="query.ruleId != null  and query.ruleId != ''"> and rule_id = #{query.ruleId}</if>
+            <if test="query.servicePrice != null "> and service_price = #{query.servicePrice}</if>
+            <if test="query.priceType != null "> and price_type = #{query.priceType}</if>
+        </where>
+    </select>
+    <select id="getPilePrice" resultType="com.hcp.operator.domain.CustomPrice">
+        <include refid="selectCustomPriceVo"/> where pile_id = #{pileId}
+    </select>
+    <select id="queryPriceByPlotId" resultType="com.hcp.system.api.domain.vo.PriceVO"
+            parameterType="java.util.HashMap">
+        select price_id id,
+               price,
+               service_price servicePrice,
+               hours,
+               `time`,
+               rang_time     rangeTime,
+               create_time createTime
+        from c_custom_price ccp
+        where del_flag = 0
+          and rule_id in (select ccp2.wx_rule_id
+                          from c_charging_pile ccp2
+                                   left join c_charging_station cp on cp.station_id = ccp2.station_id
+                          where cp.station_id = #{map.plotId}
+                            and ccp2.device_type = #{map.deviceType})
+    </select>
+
+    <delete id="deleteCustomPriceByPriceIds" parameterType="String">
+        delete from c_custom_price where price_id in
+        <foreach item="priceId" collection="array" open="(" separator="," close=")">
+            #{priceId}
+        </foreach>
+    </delete>
+</mapper>

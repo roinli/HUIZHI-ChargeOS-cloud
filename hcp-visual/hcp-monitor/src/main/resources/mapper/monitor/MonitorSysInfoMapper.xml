@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.modules.monitor.mapper.MonitorSysInfoMapper">
+
+    <resultMap type="com.hcp.modules.monitor.domain.MonitorSysInfo" id="MonitorSysInfoResult">
+        <result property="id"    column="id"    />
+        <result property="ipId"    column="ip_id"    />
+        <result property="cpuInfo"    column="cpu_info"    />
+        <result property="memInfo"    column="mem_info"    />
+        <result property="diskInfo"    column="disk_info"    />
+        <result property="cpuCoreInfo"    column="cpu_core_info"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectMonitorSysInfoVo">
+        select id, ip_id, cpu_info, mem_info, disk_info, cpu_core_info, create_by, create_time, update_by, update_time, remark, tenant_id from monitor_sys_info
+    </sql>
+
+    <select id="selectMonitorSysInfoList"   resultMap="MonitorSysInfoResult">
+        <include refid="selectMonitorSysInfoVo"/>
+        <where>
+            <if test="query.ip != null  and query.ip != ''"> and ip = #{query.ip}</if>
+            <if test="query.cpuInfo != null  and query.cpuInfo != ''"> and cpu_info = #{query.cpuInfo}</if>
+            <if test="query.memInfo != null  and query.memInfo != ''"> and mem_info = #{query.memInfo}</if>
+            <if test="query.diskInfo != null  and query.diskInfo != ''"> and disk_info = #{query.diskInfo}</if>
+            <if test="query.cpuCoreInfo != null  and query.cpuCoreInfo != ''"> and cpu_core_info = #{query.cpuCoreInfo}</if>
+            <if test="query.tenantId != null "> and tenant_id = #{query.tenantId}</if>
+        </where>
+    </select>
+
+    <delete id="deleteMonitorSysInfoByIds" parameterType="String">
+        delete from monitor_sys_info where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <delete id="deleteByIpid">
+        delete from monitor_sys_info where ip_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

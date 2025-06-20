@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.operator.mapper.ChargingStationMapper">
+
+    <resultMap type="com.hcp.system.api.domain.ChargingStation" id="ChargingStationResult">
+        <result property="stationId"    column="station_id"    />
+        <result property="stationCode"    column="station_code"    />
+        <result property="stationName"    column="station_name"    />
+        <result property="address"    column="address"    />
+        <result property="regionCode"    column="region_code"    />
+        <result property="userId"    column="user_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="lat"    column="lat"    />
+        <result property="lng"    column="lng"    />
+        <result property="parkCarInfo"    column="park_car_info"    />
+        <result property="fileId"    column="file_id"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="deviceType"    column="device_type"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="receiptStatus"    column="receipt_status"    />
+        <result property="supportingFacilities"    column="supporting_facilities"    />
+        <result property="parkCarStatus"    column="park_car_status"    />
+        <result property="province"    column="province"    />
+        <result property="city"    column="city"    />
+        <result property="area"    column="area"    />
+        <result property="isHlht"    column="is_hlht"    />
+        <result property="hlhtId"    column="hlht_id"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectChargingStationVo">
+        select station_id, station_code, station_name, address, region_code, user_id, create_time, lat, lng, park_car_info, file_id, update_time, device_type, del_flag, receipt_status, supporting_facilities, park_car_status, province, city, area, is_hlht, hlht_id, tenant_id from c_charging_station
+    </sql>
+
+    <select id="selectChargingStationList"   resultMap="ChargingStationResult">
+        <include refid="selectChargingStationVo"/>
+        <where>
+            <if test="query.stationName != null  and query.stationName != ''"> and station_name like concat('%', #{query.stationName}, '%')</if>
+            <if test="query.address != null  and query.address != ''"> and address = #{query.address}</if>
+            <if test="query.regionCode != null  and query.regionCode != ''"> and region_code = #{query.regionCode}</if>
+            <if test="query.deviceType != null "> and device_type = #{query.deviceType}</if>
+            <if test="query.isHlht != null "> and is_hlht = #{query.isHlht}</if>
+            <if test="query.hlhtId != null  and query.hlhtId != ''"> and hlht_id = #{query.hlhtId}</if>
+            <if test="query.tenantId != null  "> and tenant_id = #{query.tenantId}</if>
+        </where>
+    </select>
+
+    <delete id="deleteChargingStationByStationIds" parameterType="String">
+        delete from c_charging_station where station_id in
+        <foreach item="stationId" collection="array" open="(" separator="," close=")">
+            #{stationId}
+        </foreach>
+    </delete>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ChargingStationResult">
+        <include refid="selectChargingStationVo" />
+        where  station_id = #{stationId,jdbcType=BIGINT}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from c_charging_station
+        where  station_id = #{stationId,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertStation" keyColumn="station_id" keyProperty="stationId" parameterType="com.hcp.system.api.domain.ChargingStation" useGeneratedKeys="true">
+        insert into c_charging_station
+        ( station_id,station_code,station_name
+        ,address,region_code,user_id
+        ,create_time,lat,lng
+        ,park_car_info,file_id,update_time
+        ,device_type,del_flag,receipt_status
+        ,supporting_facilities,park_car_status,province
+        ,city,area,is_hlht
+        ,hlht_id,tenant_id,create_by
+        ,update_by)
+        values (#{stationId,jdbcType=BIGINT},#{stationCode,jdbcType=VARCHAR},#{stationName,jdbcType=VARCHAR}
+               ,#{address,jdbcType=VARCHAR},#{regionCode,jdbcType=VARCHAR},#{userId,jdbcType=BIGINT}
+               ,#{createTime,jdbcType=TIMESTAMP},#{lat,jdbcType=VARCHAR},#{lng,jdbcType=VARCHAR}
+               ,#{parkCarInfo,jdbcType=VARCHAR},#{fileId,jdbcType=VARCHAR},#{updateTime,jdbcType=TIMESTAMP}
+               ,#{deviceType,jdbcType=TINYINT},#{delFlag,jdbcType=TINYINT},#{receiptStatus,jdbcType=VARCHAR}
+               ,#{supportingFacilities,jdbcType=VARCHAR},#{parkCarStatus,jdbcType=VARCHAR},#{province,jdbcType=VARCHAR}
+               ,#{city,jdbcType=VARCHAR},#{area,jdbcType=VARCHAR},#{isHlht,jdbcType=INTEGER}
+               ,#{hlhtId,jdbcType=VARCHAR},#{tenantId,jdbcType=BIGINT},#{createBy,jdbcType=VARCHAR}
+               ,#{updateBy,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="station_id" keyProperty="stationId" parameterType="com.hcp.system.api.domain.ChargingStation" useGeneratedKeys="true">
+        insert into c_charging_station
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="stationId != null">station_id,</if>
+            <if test="stationCode != null">station_code,</if>
+            <if test="stationName != null">station_name,</if>
+            <if test="address != null">address,</if>
+            <if test="regionCode != null">region_code,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="lat != null">lat,</if>
+            <if test="lng != null">lng,</if>
+            <if test="parkCarInfo != null">park_car_info,</if>
+            <if test="fileId != null">file_id,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="deviceType != null">device_type,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="receiptStatus != null">receipt_status,</if>
+            <if test="supportingFacilities != null">supporting_facilities,</if>
+            <if test="parkCarStatus != null">park_car_status,</if>
+            <if test="province != null">province,</if>
+            <if test="city != null">city,</if>
+            <if test="area != null">area,</if>
+            <if test="isHlht != null">is_hlht,</if>
+            <if test="hlhtId != null">hlht_id,</if>
+            <if test="tenantId != null">tenant_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="stationId != null">#{stationId,jdbcType=BIGINT},</if>
+            <if test="stationCode != null">#{stationCode,jdbcType=VARCHAR},</if>
+            <if test="stationName != null">#{stationName,jdbcType=VARCHAR},</if>
+            <if test="address != null">#{address,jdbcType=VARCHAR},</if>
+            <if test="regionCode != null">#{regionCode,jdbcType=VARCHAR},</if>
+            <if test="userId != null">#{userId,jdbcType=BIGINT},</if>
+            <if test="createTime != null">#{createTime,jdbcType=TIMESTAMP},</if>
+            <if test="lat != null">#{lat,jdbcType=VARCHAR},</if>
+            <if test="lng != null">#{lng,jdbcType=VARCHAR},</if>
+            <if test="parkCarInfo != null">#{parkCarInfo,jdbcType=VARCHAR},</if>
+            <if test="fileId != null">#{fileId,jdbcType=VARCHAR},</if>
+            <if test="updateTime != null">#{updateTime,jdbcType=TIMESTAMP},</if>
+            <if test="deviceType != null">#{deviceType,jdbcType=TINYINT},</if>
+            <if test="delFlag != null">#{delFlag,jdbcType=TINYINT},</if>
+            <if test="receiptStatus != null">#{receiptStatus,jdbcType=VARCHAR},</if>
+            <if test="supportingFacilities != null">#{supportingFacilities,jdbcType=VARCHAR},</if>
+            <if test="parkCarStatus != null">#{parkCarStatus,jdbcType=VARCHAR},</if>
+            <if test="province != null">#{province,jdbcType=VARCHAR},</if>
+            <if test="city != null">#{city,jdbcType=VARCHAR},</if>
+            <if test="area != null">#{area,jdbcType=VARCHAR},</if>
+            <if test="isHlht != null">#{isHlht,jdbcType=INTEGER},</if>
+            <if test="hlhtId != null">#{hlhtId,jdbcType=VARCHAR},</if>
+            <if test="tenantId != null">#{tenantId,jdbcType=BIGINT},</if>
+            <if test="createBy != null">#{createBy,jdbcType=VARCHAR},</if>
+            <if test="updateBy != null">#{updateBy,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.hcp.system.api.domain.ChargingStation">
+        update c_charging_station
+        <set>
+            <if test="stationCode != null">
+                station_code = #{stationCode,jdbcType=VARCHAR},
+            </if>
+            <if test="stationName != null">
+                station_name = #{stationName,jdbcType=VARCHAR},
+            </if>
+            <if test="address != null">
+                address = #{address,jdbcType=VARCHAR},
+            </if>
+            <if test="regionCode != null">
+                region_code = #{regionCode,jdbcType=VARCHAR},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lat != null">
+                lat = #{lat,jdbcType=VARCHAR},
+            </if>
+            <if test="lng != null">
+                lng = #{lng,jdbcType=VARCHAR},
+            </if>
+            <if test="parkCarInfo != null">
+                park_car_info = #{parkCarInfo,jdbcType=VARCHAR},
+            </if>
+            <if test="fileId != null">
+                file_id = #{fileId,jdbcType=VARCHAR},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="deviceType != null">
+                device_type = #{deviceType,jdbcType=TINYINT},
+            </if>
+            <if test="delFlag != null">
+                del_flag = #{delFlag,jdbcType=TINYINT},
+            </if>
+            <if test="receiptStatus != null">
+                receipt_status = #{receiptStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="supportingFacilities != null">
+                supporting_facilities = #{supportingFacilities,jdbcType=VARCHAR},
+            </if>
+            <if test="parkCarStatus != null">
+                park_car_status = #{parkCarStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="province != null">
+                province = #{province,jdbcType=VARCHAR},
+            </if>
+            <if test="city != null">
+                city = #{city,jdbcType=VARCHAR},
+            </if>
+            <if test="area != null">
+                area = #{area,jdbcType=VARCHAR},
+            </if>
+            <if test="isHlht != null">
+                is_hlht = #{isHlht,jdbcType=INTEGER},
+            </if>
+            <if test="hlhtId != null">
+                hlht_id = #{hlhtId,jdbcType=VARCHAR},
+            </if>
+            <if test="tenantId != null">
+                tenant_id = #{tenantId,jdbcType=BIGINT},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where   station_id = #{stationId,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.hcp.system.api.domain.ChargingStation">
+        update c_charging_station
+        set
+            station_code =  #{stationCode,jdbcType=VARCHAR},
+            station_name =  #{stationName,jdbcType=VARCHAR},
+            address =  #{address,jdbcType=VARCHAR},
+            region_code =  #{regionCode,jdbcType=VARCHAR},
+            user_id =  #{userId,jdbcType=BIGINT},
+            create_time =  #{createTime,jdbcType=TIMESTAMP},
+            lat =  #{lat,jdbcType=VARCHAR},
+            lng =  #{lng,jdbcType=VARCHAR},
+            park_car_info =  #{parkCarInfo,jdbcType=VARCHAR},
+            file_id =  #{fileId,jdbcType=VARCHAR},
+            update_time =  #{updateTime,jdbcType=TIMESTAMP},
+            device_type =  #{deviceType,jdbcType=TINYINT},
+            del_flag =  #{delFlag,jdbcType=TINYINT},
+            receipt_status =  #{receiptStatus,jdbcType=VARCHAR},
+            supporting_facilities =  #{supportingFacilities,jdbcType=VARCHAR},
+            park_car_status =  #{parkCarStatus,jdbcType=VARCHAR},
+            province =  #{province,jdbcType=VARCHAR},
+            city =  #{city,jdbcType=VARCHAR},
+            area =  #{area,jdbcType=VARCHAR},
+            is_hlht =  #{isHlht,jdbcType=INTEGER},
+            hlht_id =  #{hlhtId,jdbcType=VARCHAR},
+            tenant_id =  #{tenantId,jdbcType=BIGINT},
+            create_by =  #{createBy,jdbcType=VARCHAR},
+            update_by =  #{updateBy,jdbcType=VARCHAR}
+        where   station_id = #{stationId,jdbcType=BIGINT}
+    </update>
+</mapper>

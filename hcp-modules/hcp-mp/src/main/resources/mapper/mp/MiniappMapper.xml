@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hcp.mp.mapper.MiniappMapper">
+
+    <resultMap type="com.hcp.system.api.domain.Miniapp" id="MiniappResult">
+        <result property="appId"    column="app_id"    />
+        <result property="name"    column="name"    />
+        <result property="logo"    column="logo"    />
+        <result property="appSecret"    column="app_secret"    />
+        <result property="mchId"    column="mch_id"    />
+        <result property="mchKey"    column="mch_key"    />
+        <result property="keyPath"    column="key_path"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="status"    column="status"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="tenantId"    column="tenant_id"    />
+    </resultMap>
+
+    <sql id="selectMiniappVo">
+        select app_id, name, logo, app_secret, mch_id, mch_key, key_path, create_time, create_by, update_time, update_by, status, del_flag, tenant_id from sys_miniapp
+    </sql>
+
+    <select id="selectMiniappList"   resultMap="MiniappResult">
+        <include refid="selectMiniappVo"/>
+        <where>
+            <if test="query.appId != null  and query.appId != ''"> and app_id = #{query.appId}</if>
+            <if test="query.name != null  and query.name != ''"> and name like concat('%', #{query.name}, '%')</if>
+            <if test="query.logo != null  and query.logo != ''"> and logo = #{query.logo}</if>
+            <if test="query.appSecret != null  and query.appSecret != ''"> and app_secret = #{query.appSecret}</if>
+            <if test="query.mchId != null  and query.mchId != ''"> and mch_id = #{query.mchId}</if>
+            <if test="query.mchKey != null  and query.mchKey != ''"> and mch_key = #{query.mchKey}</if>
+            <if test="query.keyPath != null  and query.keyPath != ''"> and key_path = #{query.keyPath}</if>
+        </where>
+    </select>
+    <select id="getById" resultType="com.hcp.system.api.domain.Miniapp" parameterType="java.lang.String">
+        <include refid="selectMiniappVo"/> where app_id = #{appId}
+    </select>
+
+    <delete id="deleteMiniappByAppIds" parameterType="String">
+        delete from sys_miniapp where app_id in
+        <foreach item="appId" collection="array" open="(" separator="," close=")">
+            #{appId}
+        </foreach>
+    </delete>
+</mapper>
