@@ -46,7 +46,7 @@
 
 [官网](http://wenhui.huizhidata.com/) |
 [在线体验](http://hzqc-pc.huizhidata.com/) |
-[帮助文档](http://doc.huizhidata.com) |
+[http://doc.huizhidata.com 帮助文档](http://doc.huizhidata.com) |
 
 [comment]: <> ([宽屏预览]&#40;https://github.com/roinli/huige-ChargeOS-cloud/blob/master/README.md&#41;)
 </div>
