@@ -3,7 +3,6 @@
 [🔥 Github的代码优先于Gitee   https://github.com/roinli/huige-ChargeOS-cloud](https://github.com/roinli/huige-ChargeOS-cloud)
 
 
-原地址不明原因被禁用，该库为镜像项目
 
 ## 开源版本一定不会很完美，不过会一直持续更新，如果遇到任何问题请提issue或者加群沟通解决，谢谢。
 
